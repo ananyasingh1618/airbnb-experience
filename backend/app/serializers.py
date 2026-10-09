@@ -66,7 +66,7 @@ def listing_out(
 def booking_out(b: Booking) -> BookingOut:
     return BookingOut(
         id=b.id,
-        reference=f"RM-{b.id:06d}",
+        reference=f"HM{b.id:08d}",
         listing_id=b.listing_id,
         listing_title=b.listing.title,
         listing_location=b.listing.location,

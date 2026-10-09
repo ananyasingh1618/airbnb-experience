@@ -13,7 +13,7 @@ interface DemoUserState {
 const Ctx = createContext<DemoUserState>({ user: null, users: [], ready: false, switchTo: () => {} });
 export const useDemoUser = () => useContext(Ctx);
 
-const KEY = "roamly-demo-user";
+const KEY = "airbnb-demo-user";
 
 /** DEMO ONLY - picks which seeded account the API client acts as. Not authentication. */
 export function DemoUserProvider({ children }: { children: React.ReactNode }) {

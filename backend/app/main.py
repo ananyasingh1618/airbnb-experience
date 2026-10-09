@@ -20,7 +20,7 @@ async def lifespan(_app: FastAPI):
 
 
 app = FastAPI(
-    title="Roamly API",
+    title="Airbnb Clone API",
     version="1.0.0",
     description="Airbnb-inspired marketplace API. Demo identity via the `X-Demo-User` header "
     "(user id) - not real authentication.",

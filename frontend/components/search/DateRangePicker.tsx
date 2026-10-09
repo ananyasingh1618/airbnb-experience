@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { DayPicker, type DateRange } from "react-day-picker";
+import { format } from "date-fns";
 import { addDays, startOfDay, startOfMonth } from "date-fns";
 import { fromISO, toISO } from "@/lib/format";
 import type { BookedRange } from "@/types";
@@ -57,6 +58,8 @@ export function DateRangePicker({ value, onChange, booked = [], months = 2 }: Pr
       selected={from ? { from, to } : undefined}
       onSelect={select}
       numberOfMonths={months}
+      navLayout="around"
+      formatters={{ formatWeekdayName: (d: Date) => format(d, "EEEEE") }}
       disabled={isDisabled}
       startMonth={startOfMonth(today)}
       endMonth={addDays(today, 540)}

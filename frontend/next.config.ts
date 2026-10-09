@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     qualities: [60, 75],
     remotePatterns: [
       { protocol: "https", hostname: "images.unsplash.com" },
-      { protocol: "https", hostname: "i.pravatar.cc" },
+      
     ],
   },
   turbopack: {

@@ -6,7 +6,7 @@
 # about a minute. Do not change `plan` or add a `disk` unless you intend to pay.
 services:
   - type: web
-    name: roamly-api
+    name: airbnb-clone-api
     runtime: python
     rootDir: backend
     plan: free
@@ -16,6 +16,6 @@ services:
     healthCheckPath: /api/health
     envVars:
       - key: CORS_ORIGINS
-        sync: false   # set in the dashboard to your Vercel URL, e.g. https://roamly.vercel.app
+        sync: false   # set in the dashboard to your Vercel URL, e.g. https://airbnb-clone.vercel.app
       - key: PYTHON_VERSION
         value: 3.13.5

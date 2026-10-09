@@ -18,7 +18,7 @@ export function PriceBreakdown({ quote, nightlyCents }: { quote: Quote; nightlyC
         <dd className="tabular-nums">{money(quote.cleaning_fee_cents, { forceCents: true })}</dd>
       </div>
       <div className={row}>
-        <dt className="text-ink-2">Roamly service fee (10%)</dt>
+        <dt className="text-ink-2">Airbnb service fee (10%)</dt>
         <dd className="tabular-nums">{money(quote.service_fee_cents, { forceCents: true })}</dd>
       </div>
       <div className={`${row} border-t border-line pt-4 text-base font-semibold`}>

@@ -53,3 +53,7 @@ export const fmtRating = (r: number) => (Math.round(r * 100) % 10 === 0 ? r.toFi
 export const isGuestFavourite = (rating: number | null, reviews: number) => (rating ?? 0) >= 4.8 && reviews >= 3;
 
 export const cityOf = (location: string) => location.split(",")[0];
+
+/** "2 guests, 1 infant, 1 pet" (guests = adults + children). */
+export const guestLabel = (guests: number, infants = 0, pets = 0) =>
+  [plural(guests, "guest"), ...(infants ? [plural(infants, "infant")] : []), ...(pets ? [plural(pets, "pet")] : [])].join(", ");

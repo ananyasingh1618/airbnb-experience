@@ -2,13 +2,13 @@ import { Skeleton } from "@/components/ui/States";
 import { ListingCard } from "@/components/listings/ListingCard";
 import type { Listing } from "@/types";
 
-export const GRID = "grid grid-cols-1 gap-x-6 gap-y-10 min-[560px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
+export const GRID = "grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:max-xmap:grid-cols-3";
 
-export function ListingGrid({ items, carry }: { items: Listing[]; carry?: string }) {
+export function ListingGrid({ items, carry, onHover }: { items: Listing[]; carry?: string; onHover?: (id: number | null) => void }) {
   return (
     <div className={GRID}>
       {items.map((l, i) => (
-        <ListingCard key={l.id} listing={l} carry={carry} priority={i < 4} />
+        <ListingCard key={l.id} listing={l} carry={carry} priority={i < 4} onHover={onHover} />
       ))}
     </div>
   );

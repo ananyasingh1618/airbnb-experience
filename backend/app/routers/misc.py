@@ -23,7 +23,7 @@ from ..schemas import (
 )
 from ..serializers import booking_out, favorite_ids, listing_out, rating_stats
 
-DEMO_EMAIL_DOMAIN = "@demo.roamly.test"
+DEMO_EMAIL_DOMAIN = "@demo.airbnb.test"
 
 router = APIRouter(prefix="/api")
 Db = Annotated[Session, Depends(get_db)]

@@ -1,19 +1,21 @@
-# Roamly — an Airbnb-inspired stays marketplace
+# Airbnb clone — educational full-stack project
 
-Roamly is an independent, photo-forward accommodation marketplace built as a full-stack assignment. Guests can search, filter, view listings, pick dates, check out (with a **simulated** payment) and see their trips; hosts can create, edit and delete listings and see reservations. It reproduces familiar marketplace interaction patterns but is **not** affiliated with Airbnb and uses no Airbnb code or assets.
+An educational clone of the Airbnb stays experience (Next.js + FastAPI + SQLite). Guests can search, filter, view listings, pick dates, check out with a **simulated** payment and see their trips; hosts can create, edit and delete listings and see reservations.
 
-> **Demo content notice:** all listings, hosts, guests, reviews and bookings are fictional seed data. Payments are simulated — nothing is charged and no card details are collected. Photos are from [Unsplash](https://unsplash.com).
+> **Not affiliated with Airbnb, Inc.** This is a coursework clone built to reproduce the product's interface and interactions. The code is an original implementation (no Airbnb source code or downloaded brand assets: the logo mark is an original SVG drawing). All listings, hosts, guests, reviews and bookings are fictional seed data, payments are simulated (nothing is charged), and photos are from [Unsplash](https://unsplash.com).
 
 ## Design fidelity
 
-The UI follows Airbnb's interaction patterns and was tuned against measurements of the live site (viewed in a browser at 1440 px): 4:3 card photos with ~20 px radius, 24 px column gaps and 48 px page margins, the "Property type in City / ★ rating (reviews) / listing name / beds / price" card text, the "Guest favourite" pill (derived from rating ≥ 4.8 with ≥ 3 reviews), a 66 px segmented search pill that collapses into a compact "Anywhere | Any week | Add guests" pill on scroll, a 1120 px listing page with a 560 px hero + 2×2 gallery, and a 372 px sticky reservation card (plus a sticky Reserve bar on mobile). It is an independent implementation, not a pixel-exact clone: fonts (Inter vs Airbnb Cereal), the logo, imagery and the home page's carousel rows differ on purpose.
+The interface was built against the live site, viewed in a browser at 1440 px and 390 px, using screenshots and measurements read from its DOM (sizes, spacing, type scale, colours). Reproduced: the two-row header (logo, All / Homes / Experiences / Services tabs, round account buttons) with the 850×66 three-segment **Where / When / Who** pill and its Where, calendar (Dates | Flexible) and Adults / Children / Infants / Pets popovers; the pill collapsing to the compact "Anywhere | Anytime | Add guests" pill on scroll; **carousel rows** of compact cards (7 across at 1440 px) with prev/next buttons; the **results page** (filter chip row, "N homes in X", 2-column grid beside a sticky map with price pins); the **Filters modal** (recommended tiles, price histogram + dual slider, live "Show N places" count); the **listing page** (1 + 4 gallery, full-screen Photo tour, sticky section nav, laurel rating block, Where you'll sleep, amenities, calendar, reviews, map, shadowed reservation card with free-cancellation note and pill Reserve button); the footer; and the phone layout (Start-your-search pill + chips, search sheet, bottom tab bar, full-bleed gallery, sticky reserve bar).
+
+It is a close reproduction, **not a pixel-exact copy**. Known differences are listed under *Known limitations*.
 
 ## Features
 
 - **Explore:** photo-led responsive grid (4 / 3 / 2 / 1 columns), 10 categories, sorting, pagination, skeleton / empty / error states.
 - **Search & filters:** destination (case-insensitive, partial, multi-word), dates, guests, price range, property type, amenities, category, "saved only". All state lives in the URL (shareable, refresh-safe); removable filter chips and *Reset filters*. Searching with dates hides listings that are already booked and shows the stay total on each card.
 - **Listing page:** 1 + 4 photo gallery (swipeable on mobile, full "Show all photos" viewer), host, capacity, amenities, availability calendar (booked nights struck through), reviews, map, sticky booking card.
-- **Booking:** date range + guest selector → server-calculated price → checkout → confirmation (`RM-000123` reference) → **My Trips** (upcoming / past / cancelled, with cancel).
+- **Booking:** date range + guest selector → server-calculated price → checkout → confirmation (`HM00000123` reference) → **My Trips** (upcoming / past / cancelled, with cancel).
 - **Host mode:** dashboard with owned listings, reservations table, create / edit / delete (delete is blocked with an explanation when a listing has booking history), ownership enforced on the backend.
 - **Favorites:** optimistic toggle persisted per demo user, synced across every card and detail page, rolled back on error.
 - **Demo accounts:** switch between a guest and two hosts from the account menu.
@@ -23,7 +25,7 @@ The UI follows Airbnb's interaction patterns and was tuned against measurements 
 
 | Layer | Tech |
 |---|---|
-| Frontend | Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · lucide-react · react-day-picker · date-fns |
+| Frontend | Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · lucide-react · react-day-picker · date-fns · Leaflet (OpenStreetMap tiles) · Figtree font |
 | Backend | Python 3.13 · FastAPI · SQLAlchemy 2 · Pydantic 2 · Uvicorn |
 | Database | SQLite (WAL mode, foreign keys enforced) |
 | Tests | pytest (backend) · optional Playwright smoke script (`e2e/`) |
@@ -61,7 +63,7 @@ python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 # No configuration needed locally. (.env.example documents the variables; the API reads real
 # environment variables and does not load a .env file, e.g. `DATABASE_URL=... uvicorn ...`.)
-python seed.py                  # creates roamly.db and seeds it (safe to re-run; `--reset` wipes first)
+python seed.py                  # creates airbnb.db and seeds it (safe to re-run; `--reset` wipes first)
 uvicorn app.main:app --reload --port 8000
 ```
 
@@ -80,7 +82,7 @@ Tables are also created automatically on API start; `seed.py` just fills them.
 | Variable | Where | Purpose |
 |---|---|---|
 | `NEXT_PUBLIC_API_URL` | frontend | Base URL of the API (default `http://localhost:8000`) |
-| `DATABASE_URL` | backend | SQLAlchemy URL, default `sqlite:///backend/roamly.db`. Leave unset on Render Free (ephemeral); set an absolute path only if you attach a persistent disk |
+| `DATABASE_URL` | backend | SQLAlchemy URL, default `sqlite:///backend/airbnb.db`. Leave unset on Render Free (ephemeral); set an absolute path only if you attach a persistent disk |
 | `CORS_ORIGINS` | backend | Comma-separated deployed frontend origin(s); `http://localhost:3000` is always allowed |
 
 ## Demo users & role switching
@@ -152,7 +154,7 @@ cd frontend && npm run lint && npm run build               # type-check + produc
 ```
 The pytest suite covers: seeding (and idempotence), combined filters + pagination, hiding booked listings, 404/422 errors, invalid reservations (past, zero/negative nights, 0 guests, over capacity, missing user, owner booking), overlap rejection (tail/head/inside/surrounding), adjacent stays allowed, persisted bookings, idempotent resubmits, cancellation freeing dates, a concurrent-booking race, host CRUD + ownership + delete-blocked-by-bookings, favorites, and the DB trigger.
 
-Optional browser smoke test (drives the real UI in Chrome against running servers; 18 steps covering search, filters, favorites, booking, My Trips, conflicts, host CRUD and mobile overflow). It assumes a **freshly seeded** database and both servers running, and it uses random future dates, so repeated runs can occasionally hit a date already booked by an earlier run (the API correctly answers 409) — re-seed with `python seed.py --reset` if that happens:
+Optional browser smoke test (drives the real UI in Chrome against running servers; 20 steps covering search, filters, favorites, booking, My Trips, conflicts, host CRUD and mobile overflow). It assumes a **freshly seeded** database and both servers running, and it uses random future dates, so repeated runs can occasionally hit a date already booked by an earlier run (the API correctly answers 409) — re-seed with `python seed.py --reset` if that happens:
 ```bash
 python seed.py --reset                   # in backend/
 npm i --no-save playwright-core          # from the repo root (installs into an ignored node_modules)
@@ -184,7 +186,10 @@ Everything below uses free plans only. If a provider asks for a payment method o
 * Demo-header "auth" only (see above); no passwords, sessions or real authorization.
 * Payments are simulated; no emails, messaging or host payouts.
 * Single-process SQLite: great for a demo, not for horizontal scaling. Cancellation is the only booking mutation (no date changes).
-* The map is an OpenStreetMap embed using seeded coordinates (needs internet; approximate area only).
+* Maps use Leaflet with OpenStreetMap tiles (needs internet; the OSM tile policy applies, so this is for light demo use). Listing pins use the seeded coordinates; the listing-page map shows an approximate area.
 * Listing images are remote URLs (Unsplash for seed data); broken URLs fall back to an icon placeholder. Seed photo IDs were checked to return HTTP 200 and visually reviewed when the seed was written, but remote availability can't be guaranteed.
 * Seed bookings use dates relative to the day the seed first ran; re-running `seed.py --reset` regenerates them.
 * Reviews can't be created through the UI (read-only seed data).
+* **Visual differences from the real Airbnb:** Figtree instead of Airbnb Cereal; the header tab icons are simple outline icons rather than 3D illustrations; the logo mark is an original SVG approximation; photos are stock images; the map style is OpenStreetMap rather than Google Maps; prices are shown in USD (not INR) and the "Prices include all fees" banner is omitted because the nightly price shown excludes fees (they are itemised at booking).
+* **Features of the real site that are intentionally not implemented:** Experiences and Services (their tabs show an explanatory toast), real log in / sign up, messaging, wishlists as named collections (favorites are a single list), host calendars and the "Things to know" section. Footer links and some menu items show a "not available in this demo" toast.
+* "Guest favourite" is derived (rating ≥ 4.8 with ≥ 3 reviews). Infants and pets are tracked in the UI and URL; only adults + children count toward capacity, and travelling with pets filters to stays that allow them.

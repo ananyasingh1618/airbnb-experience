@@ -7,7 +7,8 @@
   --surface: #f7f7f7;
   --surface-2: #f0f0f0;
   --text: #222222;
-  --text-2: #6a6a6a;
+  --text-2: #6c6c6c;
+  --grey-btn: #f2f2f2;
   --border: #dddddd;
   --border-strong: #b0b0b0;
   --brand: #ff385c;
@@ -115,22 +116,36 @@ dialog[open] { animation: pop-in 220ms var(--ease); }
 .rdp-root {
   --rdp-accent-color: var(--text);
   --rdp-accent-background-color: var(--surface-2);
-  --rdp-day-height: 40px;
-  --rdp-day-width: 40px;
-  --rdp-day_button-height: 38px;
-  --rdp-day_button-width: 38px;
+  --rdp-day-height: 44px;
+  --rdp-day-width: 44px;
+  --rdp-day_button-height: 42px;
+  --rdp-day_button-width: 42px;
   --rdp-range_middle-background-color: var(--surface-2);
   --rdp-today-color: var(--text);
   --rdp-disabled-opacity: 0.32;
   --rdp-months-gap: 2rem;
+  --rdp-nav-height: 44px;
   font-size: 14px;
   color: var(--text);
 }
-.rdp-root .rdp-month_caption { font-weight: 600; font-size: 16px; }
+.rdp-root .rdp-month_caption { font-weight: 500; font-size: 16px; justify-content: center; align-items: center; }
 .rdp-root .rdp-weekday { font-size: 12px; font-weight: 500; color: var(--text-2); opacity: 1; }
+.rdp-root .rdp-day_button { font-weight: 600; font-size: 14px; }
+.rdp-root .rdp-chevron { fill: var(--text); }
 .rdp-root .rdp-day_button:hover:not(:disabled) { border-color: var(--text); }
 .rdp-root .rdp-disabled .rdp-day_button { text-decoration: line-through; }
 .rdp-root .rdp-today:not(.rdp-selected) .rdp-day_button { font-weight: 700; }
 
-.rdp-root .rdp-selected { font-weight: 500; }
-.rdp-root .rdp-range_middle { font-weight: 400; }
+.rdp-root .rdp-selected .rdp-day_button { font-weight: 600; }
+
+.btn-grey { background: var(--grey-btn); border-radius: 8px; padding: 13px 23px; font-size: 16px; font-weight: 500; transition: background-color 150ms; }
+.btn-grey:hover { background: #e8e8e8; }
+
+/* ---------- results map ---------- */
+@theme { --breakpoint-xmap: 1320px; }
+.leaflet-container { font-family: inherit; background: #e8eaed; }
+.map-pin { position: relative; transform: translate(-50%, -50%); width: max-content; background: #fff; color: #222; border-radius: 28px; padding: 6px 11px; font-size: 14px; font-weight: 600; line-height: 18px; box-shadow: 0 2px 6px rgba(0,0,0,.22); border: 1px solid rgba(0,0,0,.06); cursor: pointer; transition: transform 120ms, background-color 120ms, color 120ms; }
+.map-pin:hover, .map-pin.is-active { background: #222; color: #fff; transform: translate(-50%, -50%) scale(1.08); z-index: 1000 !important; }
+.leaflet-touch .leaflet-bar { border: none; box-shadow: 0 1px 4px rgba(0,0,0,.25); border-radius: 50px; overflow: hidden; }
+.leaflet-touch .leaflet-bar a { width: 40px; height: 40px; line-height: 40px; color: #222; border-bottom-color: #eee; }
+.leaflet-control-attribution { font-size: 10px; }

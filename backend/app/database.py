@@ -18,7 +18,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
-DEFAULT_URL = f"sqlite:///{BACKEND_DIR / 'roamly.db'}"
+DEFAULT_URL = f"sqlite:///{BACKEND_DIR / 'airbnb.db'}"
 DATABASE_URL = os.getenv("DATABASE_URL", DEFAULT_URL)
 
 

@@ -9,13 +9,14 @@ import { cityOf, fmtRating, formatRange, isGuestFavourite, money, plural } from 
 import type { Listing } from "@/types";
 
 interface Props {
+  onHover?: (id: number | null) => void;
   listing: Listing;
   /** Query string (dates/guests) forwarded to the detail page so the stay carries over. */
   carry?: string;
   priority?: boolean;
 }
 
-export function ListingCard({ listing, carry = "", priority = false }: Props) {
+export function ListingCard({ listing, carry = "", priority = false, onHover }: Props) {
   const [idx, setIdx] = useState(0);
   const [failed, setFailed] = useState<Record<number, boolean>>({});
   const images = listing.images.slice(0, 5);
@@ -31,7 +32,7 @@ export function ListingCard({ listing, carry = "", priority = false }: Props) {
   };
 
   return (
-    <article className="group relative">
+    <article className="group relative" onMouseEnter={() => onHover?.(listing.id)} onMouseLeave={() => onHover?.(null)}>
       <Link href={href} className="block rounded-xl focus-visible:outline-offset-4" aria-label={`${listing.title}, ${listing.location}`}>
         <div className="relative aspect-[4/3] overflow-hidden rounded-[20px] bg-surface-2">
           {failed[idx] ? (

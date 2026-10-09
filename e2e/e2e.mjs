@@ -10,10 +10,12 @@ const off = 150 + Math.floor(Math.random()*150);
 const step = async (name, fn) => { try { await fn(); console.log("PASS", name); } catch (e) { console.log("FAIL", name, "-", e.message.split("\n")[0]); } };
 const ok = (c, m) => { if (!c) throw new Error(m); };
 
-await step("home renders 12 cards w/ prices", async () => {
+await step("home renders carousel rows with prices", async () => {
   await p.goto(B, { waitUntil: "networkidle" });
-  ok(await p.locator("article").count() === 12, "cards="+await p.locator("article").count());
-  ok((await p.locator("article").first().innerText()).includes("$"), "no price");
+  const rows = await p.locator("main section[aria-label]").count();
+  ok(rows >= 4, "rows=" + rows);
+  const first = await p.locator("article").first().innerText();
+  ok(first.includes("$") && /Guest favourite|in /.test(first), "card text: " + first.slice(0, 40));
 });
 await step("header: pill collapses on scroll and re-expands on click", async () => {
   ok(await p.locator("[role=search]").count() === 1, "expanded pill missing at top");
@@ -23,23 +25,34 @@ await step("header: pill collapses on scroll and re-expands on click", async () 
   ok(await p.locator("[role=search]").count() === 1, "did not re-expand");
   await p.evaluate(() => window.scrollTo(0, 0)); await p.waitForTimeout(400);
 });
-await step("category filter (Cabins)", async () => {
-  await p.getByRole("button", { name: "Cabins" }).click(); await p.waitForURL(/category=cabins/);
-  await p.waitForTimeout(700); const n = await p.locator("article").count(); ok(n>=2 && n<12, "n="+n);
-  await p.getByRole("button", { name: "Reset filters" }).click(); await p.waitForTimeout(700);
+await step("carousel title opens filtered results (Cabins) and Reset works", async () => {
+  await p.goto(B, { waitUntil: "networkidle" });
+  await p.getByRole("link", { name: /Cabins & mountain retreats/ }).click(); await p.waitForURL(/category=cabins/);
+  await p.waitForTimeout(900); const n = await p.locator("article").count(); ok(n >= 2 && n < 12, "n=" + n);
+  await p.getByRole("button", { name: "Reset filters" }).click(); await p.waitForTimeout(900);
+  ok(await p.locator("article").count() === 12, "reset shows all homes");
+});
+await step("amenity chip filters results (Pool)", async () => {
+  await p.goto(B + "/?homes=1", { waitUntil: "networkidle" });
+  await p.getByRole("button", { name: "Pool", exact: true }).click(); await p.waitForURL(/amenities=Pool/); await p.waitForTimeout(900);
+  const n = await p.locator("article").count(); ok(n >= 2 && n < 12, "n=" + n);
 });
 await step("search destination via bar", async () => {
+  await p.goto(B, { waitUntil: "networkidle" });
   await p.getByPlaceholder("Search destinations").first().fill("paris"); await p.getByRole("button", { name: "Search", exact: true }).click();
   await p.waitForURL(/q=paris/); await p.waitForTimeout(700);
   ok(await p.locator("article").count() === 1, "paris count="+await p.locator("article").count());
 });
-await step("filters dialog (price+amenity) changes results", async () => {
-  await p.goto(B, { waitUntil: "networkidle" });
+await step("filters dialog (price) changes results and live count matches", async () => {
+  await p.goto(B + "/?homes=1", { waitUntil: "networkidle" });
   await p.getByRole("button", { name: /^Filters/ }).first().click();
-  await p.locator("#f-max").fill("160"); await p.getByRole("button", { name: "Show results" }).click();
-  await p.waitForURL(/max_price=160/); await p.waitForTimeout(700);
+  await p.locator("#f-max").fill("160"); await p.waitForTimeout(900);
+  const label = await p.getByRole("button", { name: /^Show \d+ place/ }).innerText();
+  await p.getByRole("button", { name: /^Show \d+ place/ }).click();
+  await p.waitForURL(/max_price=160/); await p.waitForTimeout(900);
   const prices = await p.locator("article p.mt-1 span.font-semibold").allInnerTexts();
-  ok(prices.length>0 && prices.every(t => Number(t.replace(/\D/g,"")) <= 160), "prices "+prices);
+  ok(prices.length > 0 && prices.every(t => Number(t.replace(/\D/g, "")) <= 160), "prices " + prices);
+  const total = Number(label.match(/\d+/)[0]); ok(total >= prices.length, "count " + label);
 });
 await step("favorite toggle persists across reload & not navigate", async () => {
   await p.goto(B, { waitUntil: "networkidle" });
@@ -80,7 +93,7 @@ await step("not-found listing", async () => {
 });
 await step("switch to host via menu; host dashboard", async () => {
   await p.goto(B, { waitUntil: "networkidle" });
-  await p.getByRole("button", { name: "Account menu" }).click(); await p.getByRole("menuitemradio", { name: /Lucas Moreau/ }).click();
+  await p.getByRole("button", { name: "Account", exact: true }).click(); await p.getByRole("menuitemradio", { name: /Lucas Moreau/ }).click();
   await p.goto(`${B}/host`, { waitUntil: "networkidle" }); await p.waitForTimeout(600);
   ok((await p.locator("main").innerText()).includes("Host dashboard"), "no dash");
   ok((await p.locator("table").innerText()).includes("Maya Chen"), "guest booking not in host table");
@@ -95,7 +108,7 @@ await step("host creates listing (validation then success)", async () => {
   await p.fill("#f-images", "https://images.unsplash.com/photo-1449158743715-0a90ebb6d2d8?auto=format&fit=crop&w=1600&q=80");
   await p.getByRole("button", { name: "Wifi" }).click();
   await p.getByRole("button", { name: "Create listing" }).click(); await p.waitForURL(/listings\/\d+$/, { timeout: 8000 });
-  ok((await p.locator("h1").innerText()) === title, "title");
+  ok((await p.locator("h1:visible").innerText()) === title, "title");
 });
 await step("new listing appears in Explore search", async () => {
   await p.goto(`${B}/?q=Testville`, { waitUntil: "networkidle" }); await p.waitForTimeout(500);
@@ -111,9 +124,9 @@ await step("host edits listing", async () => {
 await step("other host cannot edit (Priya)", async () => {
   const url = p.url(); await p.locator("li", { hasText: title }).getByRole("link", { name: "Edit" }).click(); await p.waitForURL(/edit/);
   const editUrl = p.url();
-  await p.getByRole("button", { name: "Account menu" }).click(); await p.getByRole("menuitemradio", { name: /Priya Nair/ }).click(); await p.waitForTimeout(800);
+  await p.getByRole("button", { name: "Account", exact: true }).click(); await p.getByRole("menuitemradio", { name: /Priya Nair/ }).click(); await p.waitForTimeout(800);
   ok((await p.locator("main").innerText()).includes("not your listing"), "ownership not enforced in UI");
-  await p.getByRole("button", { name: "Account menu" }).click(); await p.getByRole("menuitemradio", { name: /Lucas Moreau/ }).click(); await p.waitForTimeout(300);
+  await p.getByRole("button", { name: "Account", exact: true }).click(); await p.getByRole("menuitemradio", { name: /Lucas Moreau/ }).click(); await p.waitForTimeout(300);
 });
 await step("host deletes listing; booked listing blocked", async () => {
   await p.goto(`${B}/host`, { waitUntil: "networkidle" }); await p.waitForTimeout(500);
@@ -123,6 +136,22 @@ await step("host deletes listing; booked listing blocked", async () => {
   await p.locator("li", { hasText: "Sunlit apartment" }).getByRole("button", { name: "Delete" }).click();
   await p.getByRole("button", { name: "Delete listing" }).click(); await p.waitForTimeout(800);
   ok((await p.getByRole("dialog").innerText()).includes("booking history"), "no block msg");
+});
+await step("mobile: search sheet applies a destination; tab bar and sticky reserve bar behave", async () => {
+  const m = await b.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }); const mp = await m.newPage();
+  await mp.goto(B, { waitUntil: "networkidle" });
+  await mp.getByRole("button", { name: "Start your search" }).click();
+  await mp.getByRole("button", { name: /Paris, France/ }).click();            // pick suggestion -> opens When
+  await mp.getByRole("button", { name: /^\d+$/ }).nth(20).click().catch(() => {});
+  await mp.getByRole("button", { name: "Search", exact: true }).click();
+  await mp.waitForURL(/q=Paris/); await mp.waitForTimeout(800);
+  ok(await mp.locator("article").count() === 1, "paris results on mobile");
+  ok(await mp.getByRole("navigation", { name: "Main" }).isVisible(), "tab bar visible");
+  await mp.getByRole("link", { name: "Wishlists" }).click(); await mp.waitForURL(/favorites=1/);
+  await mp.goto(B + "/listings/3", { waitUntil: "networkidle" }); await mp.waitForTimeout(500);
+  ok(await mp.getByRole("button", { name: /Reserve|Check dates/ }).isVisible(), "sticky reserve bar visible");
+  ok(await mp.getByRole("navigation", { name: "Main" }).count() === 0, "tab bar hidden on listing page");
+  await m.close();
 });
 await step("mobile 390px: no horizontal overflow on key pages", async () => {
   const m = await b.newContext({ viewport: { width: 390, height: 800 } }); const mp = await m.newPage();

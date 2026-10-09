@@ -18,7 +18,7 @@ from app.database import Base, SessionLocal, engine
 from app.models import Amenity, Booking, Favorite, Listing, ListingImage, Review, User
 from app.core import make_quote
 
-DEMO = "@demo.roamly.test"
+DEMO = "@demo.airbnb.test"
 
 
 def img(photo_id: str) -> str:
@@ -182,10 +182,8 @@ def run(reset: bool = False) -> None:
             email = f"{local}{DEMO}"
             u = db.scalar(select(User).where(User.email == email))
             if not u:
-                u = User(
-                    name=name, email=email, role=role, bio=bio,
-                    avatar_url=f"https://i.pravatar.cc/160?u={local}-roamly",
-                )
+                # No stock face photos for fictional people: the UI shows initials instead.
+                u = User(name=name, email=email, role=role, bio=bio, avatar_url=None)
                 db.add(u)
             users[local] = u
         reviewers = []
@@ -193,8 +191,7 @@ def run(reset: bool = False) -> None:
             email = f"{name.split()[0].lower()}.{i}@reviewers.example"
             r = db.scalar(select(User).where(User.email == email))
             if not r:
-                r = User(name=name, email=email, role="guest",
-                         avatar_url=f"https://i.pravatar.cc/160?u={email}")
+                r = User(name=name, email=email, role="guest", avatar_url=None)
                 db.add(r)
             reviewers.append(r)
         db.flush()

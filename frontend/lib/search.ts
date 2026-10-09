@@ -3,7 +3,10 @@ export interface SearchState {
   q: string;
   check_in: string;
   check_out: string;
-  guests: number;
+  guests: number; // adults + children (infants and pets are not counted, as on Airbnb)
+  children: number;
+  infants: number;
+  pets: number;
   min_price: string;
   max_price: string;
   property_type: string;
@@ -12,11 +15,12 @@ export interface SearchState {
   sort: string;
   page: number;
   favorites: boolean;
+  homes: boolean; // "Homes" tab: show the full results grid even with no filters
 }
 
 export const EMPTY_SEARCH: SearchState = {
-  q: "", check_in: "", check_out: "", guests: 0, min_price: "", max_price: "",
-  property_type: "", amenities: [], category: "", sort: "recommended", page: 1, favorites: false,
+  q: "", check_in: "", check_out: "", guests: 0, children: 0, infants: 0, pets: 0, min_price: "", max_price: "",
+  property_type: "", amenities: [], category: "", sort: "recommended", page: 1, favorites: false, homes: false,
 };
 
 type SP = { get(k: string): string | null };
@@ -31,6 +35,9 @@ export function parseSearch(sp: SP): SearchState {
     check_in: sp.get("check_in") ?? "",
     check_out: sp.get("check_out") ?? "",
     guests: num("guests"),
+    children: num("children"),
+    infants: num("infants"),
+    pets: num("pets"),
     min_price: sp.get("min_price") ?? "",
     max_price: sp.get("max_price") ?? "",
     property_type: sp.get("type") ?? "",
@@ -39,6 +46,7 @@ export function parseSearch(sp: SP): SearchState {
     sort: sp.get("sort") ?? "recommended",
     page: num("page") || 1,
     favorites: sp.get("favorites") === "1",
+    homes: sp.get("homes") === "1",
   };
 }
 
@@ -50,6 +58,9 @@ export function toQuery(s: SearchState): URLSearchParams {
     p.set("check_out", s.check_out);
   }
   if (s.guests > 0) p.set("guests", String(s.guests));
+  if (s.children > 0) p.set("children", String(s.children));
+  if (s.infants > 0) p.set("infants", String(s.infants));
+  if (s.pets > 0) p.set("pets", String(s.pets));
   if (s.min_price) p.set("min_price", s.min_price);
   if (s.max_price) p.set("max_price", s.max_price);
   if (s.property_type) p.set("type", s.property_type);
@@ -58,6 +69,7 @@ export function toQuery(s: SearchState): URLSearchParams {
   if (s.sort && s.sort !== "recommended") p.set("sort", s.sort);
   if (s.page > 1) p.set("page", String(s.page));
   if (s.favorites) p.set("favorites", "1");
+  if (s.homes) p.set("homes", "1");
   return p;
 }
 
@@ -71,7 +83,8 @@ export function toApiParams(s: SearchState, pageSize: number) {
     min_price: s.min_price || undefined,
     max_price: s.max_price || undefined,
     property_type: s.property_type || undefined,
-    amenities: s.amenities.join(",") || undefined,
+    // Travelling with pets narrows results to stays that allow them.
+    amenities: [...s.amenities, ...(s.pets > 0 && !s.amenities.includes("Pets allowed") ? ["Pets allowed"] : [])].join(",") || undefined,
     category: s.category || undefined,
     sort: s.sort,
     page: s.page,
@@ -83,3 +96,15 @@ export function toApiParams(s: SearchState, pageSize: number) {
 /** Number of "advanced" filters (those inside the Filters dialog). */
 export const filterCount = (s: SearchState) =>
   (s.min_price || s.max_price ? 1 : 0) + (s.property_type ? 1 : 0) + s.amenities.length;
+
+/** True when the URL describes a search/filter (the Explore grid), false for the carousel home page. */
+export const isSearching = (s: SearchState) =>
+  Boolean(s.q.trim() || s.check_in || s.guests || s.pets || s.infants || s.min_price || s.max_price || s.property_type || s.amenities.length || s.category || s.favorites || s.homes || s.sort !== "recommended" || s.page > 1);
+
+export const guestSummary = (guests: number, infants: number, pets: number) => {
+  const parts: string[] = [];
+  if (guests) parts.push(`${guests} guest${guests === 1 ? "" : "s"}`);
+  if (infants) parts.push(`${infants} infant${infants === 1 ? "" : "s"}`);
+  if (pets) parts.push(`${pets} pet${pets === 1 ? "" : "s"}`);
+  return parts.join(", ");
+};

@@ -91,7 +91,7 @@ def test_overlap_rejected_adjacent_allowed_and_persisted(client):
 
     mine = client.get("/api/bookings/mine", headers=MAYA).json()
     assert any(b["id"] == body["id"] for b in mine)
-    assert client.get(f"/api/bookings/{body['id']}", headers=MAYA).json()["reference"].startswith("RM-")
+    assert client.get(f"/api/bookings/{body['id']}", headers=MAYA).json()["reference"].startswith("HM")
     av = client.get(f"/api/listings/17/availability?check_in={d(201)}&check_out={d(204)}&guests=2").json()
     assert av["available"] is False
 
