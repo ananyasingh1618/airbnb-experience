@@ -4,6 +4,7 @@ import tempfile
 # Must be set before the app is imported so tests use a throwaway database.
 _tmp = tempfile.mkdtemp()
 os.environ["DATABASE_URL"] = f"sqlite:///{_tmp}/test.db"
+os.environ["CORS_ORIGINS"] = "https://frontend.example.app, https://other.example.app/"  # trailing slash/space must be tolerated
 
 import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402

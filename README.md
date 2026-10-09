@@ -174,6 +174,24 @@ Everything below uses free plans only. If a provider asks for a payment method o
 
 **Frontend → Vercel Hobby:** import the repo, set *Root Directory* to `frontend` (framework: Next.js, defaults otherwise), add `NEXT_PUBLIC_API_URL=https://<service>.onrender.com`, deploy. Then put the Vercel URL into the backend's `CORS_ORIGINS` and redeploy/restart the backend.
 
+### Verified deployment values (as deployed by the repository owner)
+
+| Item | Value |
+|---|---|
+| Frontend (Vercel) | `https://airbnb-experience-psi.vercel.app` |
+| Backend (Render Free) | `https://airbnb-clone-api-6x1f.onrender.com` — note the ending is the **digit one** (`6x1f`), not the letter l |
+| Vercel env var | `NEXT_PUBLIC_API_URL` = the backend URL above (no trailing slash; it is baked in at build time, so redeploy after changing it) |
+| Render env var | `CORS_ORIGINS` = the exact Vercel origin above (several origins may be comma-separated) |
+| Health check | `GET <backend>/api/health` → `{"status":"ok"}` (`GET /` returning 404 is expected for an API) |
+
+### Troubleshooting a browser "Dangerous site" warning on the backend URL
+
+* Open the warning's **Details** link and note the exact wording (deceptive/phishing vs. malware vs. harmful programs) — the cause differs.
+* A Safe Browsing warning is a *reputation* decision made by Google, not something in this code (there are no redirects, injected scripts or external trackers). Google's public Transparency Report may show "No available data" for brand-new hostnames, which is inconclusive.
+* Rule out local causes first: try another browser, another device or network, and Chrome Incognito (extensions off).
+* If other networks/devices also show it, report a false positive at <https://safebrowsing.google.com/safebrowsing/report_error/> (no domain ownership needed) and read <https://support.google.com/chrome/answer/99020>. Search Console's review flow needs proof of ownership, which a shared `*.onrender.com` hostname does not give you.
+* This project reproduces Airbnb's look and name for coursework. Automated phishing detection can treat a lookalike under an unrelated hostname that contains a well-known brand as suspicious. If that is the cause, a neutral hostname (e.g. rename the Render service) and keeping the on-page educational disclaimer are the legitimate remedies; renaming changes the URL, so `NEXT_PUBLIC_API_URL` and `CORS_ORIGINS` must be updated together.
+
 ### Free-tier limitations — read before relying on the live demo
 
 * **The database is temporary.** Render's free filesystem is ephemeral and free services cannot attach persistent disks ([Render docs](https://render.com/docs/free)). The SQLite file is lost on every restart, redeploy and spin-down, then re-created and re-seeded by `seed.py`. **Bookings, favorites and host edits made on the live demo do not persist.**

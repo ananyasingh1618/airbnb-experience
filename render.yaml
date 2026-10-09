@@ -16,6 +16,6 @@ services:
     healthCheckPath: /api/health
     envVars:
       - key: CORS_ORIGINS
-        sync: false   # set in the dashboard to your Vercel URL, e.g. https://airbnb-clone.vercel.app
+        sync: false   # set in the dashboard to your exact Vercel origin (scheme + host, no path)
       - key: PYTHON_VERSION
         value: 3.13.5

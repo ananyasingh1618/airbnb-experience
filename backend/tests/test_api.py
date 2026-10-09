@@ -184,3 +184,25 @@ def test_db_trigger_blocks_overlap_even_without_app_check():
     except sqlite3.IntegrityError as e:
         raised = "booking_overlap" in str(e)
     assert raised
+
+
+def _preflight(client, origin):
+    return client.options(
+        "/api/listings",
+        headers={"Origin": origin, "Access-Control-Request-Method": "GET", "Access-Control-Request-Headers": "x-demo-user"},
+    )
+
+
+def test_cors_allows_configured_and_local_origins_only(client):
+    for ok_origin in ("https://frontend.example.app", "https://other.example.app", "http://localhost:3000"):
+        r = _preflight(client, ok_origin)
+        assert r.status_code == 200 and r.headers["access-control-allow-origin"] == ok_origin, ok_origin
+    bad = _preflight(client, "https://evil.example.com")
+    assert bad.status_code == 400 and "access-control-allow-origin" not in bad.headers
+    # never a wildcard
+    assert _preflight(client, "https://frontend.example.app").headers["access-control-allow-origin"] != "*"
+
+
+def test_health_and_root_behaviour(client):
+    assert client.get("/api/health").json() == {"status": "ok"}
+    assert client.get("/docs").status_code == 200
