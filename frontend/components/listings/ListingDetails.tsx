@@ -68,10 +68,12 @@ export function ListingDetails({ listing }: { listing: Listing }) {
             </p>
             {listing.rating ? (
               <div className="mt-6 flex items-center justify-between gap-4 rounded-xl border border-line px-6 py-4">
-                <p className="font-semibold leading-tight">{isGuestFavourite(listing.rating, listing.review_count) ? "Guest favourite" : "Rated by guests"}<span className="block text-sm font-normal text-ink-2">{isGuestFavourite(listing.rating, listing.review_count) ? "One of the most loved stays on Roamly, according to guests" : "Based on sample reviews"}</span></p>
-                <div className="flex shrink-0 items-center divide-x divide-line">
-                  <p className="pr-5 text-center"><span className="block text-[22px] font-semibold leading-6">{fmtRating(listing.rating)}</span><span className="flex justify-center gap-px">{Array.from({ length: 5 }).map((_, i) => <Star key={i} className="size-2.5 fill-ink" aria-hidden />)}</span></p>
-                  <p className="pl-5 text-center"><span className="block text-[22px] font-semibold leading-6">{listing.review_count}</span><span className="text-xs text-ink-2">Reviews</span></p>
+                {isGuestFavourite(listing.rating, listing.review_count) && (
+                  <p className="font-semibold leading-tight">Guest favourite<span className="block max-w-[260px] text-sm font-normal text-ink-2">One of the most loved homes on Roamly, according to guests</span></p>
+                )}
+                <div className={`flex shrink-0 items-center divide-x divide-line ${isGuestFavourite(listing.rating, listing.review_count) ? "" : "mx-auto"}`}>
+                  <p className="px-5 text-center"><span className="block text-[22px] font-semibold leading-6">{fmtRating(listing.rating)}</span><span className="flex justify-center gap-px" aria-hidden>{Array.from({ length: 5 }).map((_, i) => <Star key={i} className="size-2.5 fill-ink" />)}</span></p>
+                  <p className="px-5 text-center"><span className="block text-[22px] font-semibold leading-6">{listing.review_count}</span><span className="text-xs text-ink-2">Reviews</span></p>
                 </div>
               </div>
             ) : <p className="mt-3 text-sm text-ink-2">New listing</p>}

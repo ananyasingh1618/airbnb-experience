@@ -33,7 +33,7 @@ export function ListingGallery({ images, title }: { images: string[]; title: str
             <Image src={src} alt={alt(i + 1)} fill sizes="(min-width:1280px) 320px, 25vw" quality={60} className="object-cover" />
           </button>
         ))}
-        <button onClick={() => show(0)} className="absolute bottom-6 right-6 flex items-center gap-2 rounded-lg border border-black/10 bg-white px-3 py-1.5 text-xs font-semibold shadow-sm transition-colors hover:bg-surface">
+        <button onClick={() => show(0)} className="absolute bottom-6 right-6 flex items-center gap-2 rounded-lg border border-black/10 bg-white px-3 py-2 text-xs font-semibold shadow-sm transition-colors hover:bg-surface">
           <Grid2x2 className="size-3.5" aria-hidden />
           Show all photos
         </button>

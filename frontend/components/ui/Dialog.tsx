@@ -42,7 +42,7 @@ export function Dialog({ open, onClose, title, children, footer, size = "md" }: 
       onClose={onClose}
       onClick={(e) => e.target === ref.current && onClose()}
       aria-label={title}
-      className={`${width} m-auto max-h-[100dvh] overflow-hidden rounded-none bg-bg p-0 text-ink shadow-pop sm:max-h-[90vh] sm:rounded-2xl`}
+      className={`${width} m-auto max-w-[100vw] max-sm:h-[100dvh] max-sm:w-screen max-h-[100dvh] overflow-hidden rounded-none bg-bg p-0 text-ink shadow-pop sm:max-h-[90vh] sm:rounded-2xl`}
     >
       <div className="flex max-h-[inherit] h-full flex-col">
         <header className="flex items-center justify-between border-b border-line px-5 py-3.5">
