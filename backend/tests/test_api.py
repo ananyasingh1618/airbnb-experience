@@ -222,3 +222,17 @@ def test_no_endpoint_accepts_card_or_password_data(client):
     schema = client.get("/openapi.json").text.lower()
     for word in ("password", "card_number", "cardnumber", "cvv", "cvc", "iban", "expiry"):
         assert word not in schema, word
+
+
+def test_google_verification_file_is_served_byte_for_byte(client):
+    from pathlib import Path
+
+    expected = (Path(__file__).resolve().parent.parent / "static" / "googlea11c4320d64e9163.html").read_bytes()
+    r = client.get("/googlea11c4320d64e9163.html")
+    assert r.status_code == 200
+    assert r.content == expected
+    assert r.content == b"google-site-verification: googlea11c4320d64e9163.html"
+    assert r.headers["content-type"].startswith("text/html")
+    # only this exact file is exposed: no other files under static/ and no listing in the API schema
+    assert client.get("/static/googlea11c4320d64e9163.html").status_code == 404
+    assert "/googlea11c4320d64e9163.html" not in client.get("/openapi.json").json()["paths"]

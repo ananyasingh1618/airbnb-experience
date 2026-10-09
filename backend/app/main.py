@@ -1,10 +1,11 @@
 import os
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 from sqlalchemy.exc import OperationalError
 
 from . import models  # noqa: F401  (register tables)
@@ -77,6 +78,15 @@ def root():
         "docs": "/docs",
         "health": "/api/health",
     }
+
+
+GOOGLE_VERIFICATION_FILE = Path(__file__).resolve().parent.parent / "static" / "googlea11c4320d64e9163.html"
+
+
+@app.get("/googlea11c4320d64e9163.html", include_in_schema=False)
+def google_site_verification():
+    """Google Search Console ownership file, served byte-for-byte (only this one file is exposed)."""
+    return FileResponse(GOOGLE_VERIFICATION_FILE, media_type="text/html")
 
 
 app.include_router(listings.router)
