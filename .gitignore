@@ -1,0 +1,17 @@
+node_modules/
+.next/
+out/
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+.env.*
+!.env.example
+*.db
+*.db-shm
+*.db-wal
+.DS_Store
+*.log
+.vercel/

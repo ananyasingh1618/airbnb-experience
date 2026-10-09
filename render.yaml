@@ -1,0 +1,21 @@
+# Render blueprint for the API. SQLite needs a persistent disk, which requires a paid instance type.
+services:
+  - type: web
+    name: roamly-api
+    runtime: python
+    rootDir: backend
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: python seed.py && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        value: sqlite:////var/data/roamly.db
+      - key: CORS_ORIGINS
+        sync: false   # set to your Vercel URL, e.g. https://roamly.vercel.app
+      - key: PYTHON_VERSION
+        value: 3.13.5
+    disk:
+      name: roamly-data
+      mountPath: /var/data
+      sizeGB: 1
