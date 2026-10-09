@@ -1,10 +1,10 @@
 "use client";
 
-import { Suspense, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Briefcase, Check, Heart, Luggage, Menu, Search } from "lucide-react";
-import { SearchBar } from "@/components/search/SearchBar";
+import { CompactSearch, SearchBar } from "@/components/search/SearchBar";
 import { Avatar } from "@/components/ui/Avatar";
 import { useClickOutside } from "@/lib/hooks";
 import { useDemoUser } from "@/lib/demo-user";
@@ -82,34 +82,78 @@ function AccountMenu() {
 export function SiteHeader() {
   const { user } = useDemoUser();
   const pathname = usePathname();
-  const nav = (href: string, label: string) => (
-    <Link
-      href={href}
-      className={`whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-medium transition-colors hover:bg-surface-2 ${pathname === href ? "bg-surface-2" : ""}`}
-    >
-      {label}
-    </Link>
-  );
+  const header = useRef<HTMLElement>(null);
+  const [scrolled, setScrolled] = useState(false);
+  const [forced, setForced] = useState(false);
+  const [lastPath, setLastPath] = useState(pathname);
+  const openedAt = useRef(0);
+  const openedTime = useRef(0);
+
+  // Airbnb: the big pill shows at the top of Explore and collapses once you scroll.
+  if (lastPath !== pathname) {
+    setLastPath(pathname);
+    setForced(false);
+  }
+  const expanded = (pathname === "/" && !scrolled) || forced;
+
+  useEffect(() => {
+    const onScroll = () => {
+      setScrolled(window.scrollY > 8);
+      // Opening the pill grows the header and shifts the page; re-baseline during that settle
+      // window so only a deliberate scroll afterwards closes it.
+      if (performance.now() - openedTime.current < 500) openedAt.current = window.scrollY;
+      else if (Math.abs(window.scrollY - openedAt.current) > 48) setForced(false);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Publish the live header height so sticky rows below it can offset correctly.
+  useEffect(() => {
+    const el = header.current;
+    if (!el) return;
+    const set = () => document.documentElement.style.setProperty("--header-h", `${el.offsetHeight}px`);
+    set();
+    const ro = new ResizeObserver(set);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  useClickOutside(header, () => setForced(false), forced);
+
+  const link = "whitespace-nowrap rounded-full px-4 py-3 text-sm font-medium transition-colors hover:bg-surface-2";
+  const collapse = () => setForced(false);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-bg">
-      <div className="mx-auto flex max-w-[1760px] items-center gap-3 px-4 py-3 sm:px-6 lg:px-10 md:grid md:grid-cols-[1fr_auto_1fr] md:gap-6 md:py-4">
-        <div className="md:justify-self-start"><Wordmark /></div>
-        <div className="min-w-0 flex-1 md:flex-none md:w-[min(820px,48vw)] lg:w-[min(820px,52vw)]">
-          <Suspense fallback={<div className="skeleton h-[52px] rounded-full" />}>
-            <SearchBar />
-          </Suspense>
+    <header ref={header} className={`sticky top-0 z-40 bg-bg ${pathname === "/" && expanded && !scrolled ? "" : "border-b border-line"}`}>
+      <div className="mx-auto grid max-w-[1760px] grid-cols-[auto_1fr_auto] items-center gap-3 px-4 sm:px-6 md:h-24 md:px-10 xl:px-12 max-md:py-3">
+        <Wordmark />
+        <div className="min-w-0">
+          <div className="md:hidden">
+            <Suspense fallback={<div className="skeleton h-[52px] rounded-full" />}><SearchBar mode="mobile" /></Suspense>
+          </div>
+          <div className="hidden md:block">
+            {expanded ? (
+              <Link href="/" className="mx-auto block w-fit border-b-2 border-ink px-1 pb-2 pt-3 text-base font-medium" aria-current="page">Stays</Link>
+            ) : (
+              <Suspense fallback={<div className="skeleton mx-auto h-12 w-[380px] rounded-full" />}><CompactSearch onOpen={() => { openedAt.current = window.scrollY; openedTime.current = performance.now(); setForced(true); }} /></Suspense>
+            )}
+          </div>
         </div>
         <div className="flex items-center justify-end gap-1">
-          <div className="hidden items-center lg:flex">
-            {nav("/", "Explore")}
-            {nav("/trips", "My trips")}
-            {user?.role === "host" ? nav("/host", "Host dashboard") : nav("/host", "Become a host")}
-          </div>
+          <Link href={user?.role === "host" ? "/host" : "/host"} className={`${link} hidden lg:block`}>{user?.role === "host" ? "Host dashboard" : "Become a host"}</Link>
+          <Link href="/trips" className={`${link} hidden lg:block`}>Trips</Link>
           <AccountMenu />
         </div>
       </div>
+      {expanded && (
+        <div className="anim-fade hidden px-4 pb-4 sm:px-6 md:block md:px-10 xl:px-12">
+          <Suspense fallback={<div className="skeleton mx-auto h-[66px] max-w-[850px] rounded-full" />}>
+            <SearchBar mode="desktop" onSubmitted={collapse} />
+          </Suspense>
+        </div>
+      )}
     </header>
   );
 }
-

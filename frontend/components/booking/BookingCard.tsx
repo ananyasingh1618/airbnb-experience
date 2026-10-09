@@ -2,7 +2,6 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Star } from "lucide-react";
 import { DateRangePicker } from "@/components/search/DateRangePicker";
 import { GuestSelector } from "@/components/search/GuestSelector";
 import { PriceBreakdown } from "@/components/booking/PriceBreakdown";
@@ -51,23 +50,17 @@ export function BookingCard({ listing }: { listing: Listing }) {
   const field = "flex flex-col px-3.5 py-2.5 text-left transition-colors hover:bg-surface";
 
   return (
-    <aside ref={wrap} aria-label="Reservation" className="relative rounded-2xl border border-line bg-bg p-6 shadow-pop">
-      <div className="mb-5 flex items-baseline justify-between">
-        <p>
-          <span className="text-[22px] font-semibold">{money(listing.price_per_night_cents)}</span>
-          <span className="text-ink-2"> night</span>
-        </p>
-        {listing.rating && (
-          <p className="flex items-center gap-1 text-sm">
-            <Star className="size-3.5 fill-ink" aria-hidden />
-            <span className="font-semibold">{listing.rating.toFixed(2)}</span>
-            <span className="text-ink-2">· {plural(listing.review_count, "review")}</span>
-          </p>
+    <aside ref={wrap} aria-label="Reservation" className="relative rounded-xl border border-line bg-bg p-6 shadow-[0_6px_16px_rgba(0,0,0,0.12)]">
+      <div className="mb-5">
+        {quote ? (
+          <p className="text-base text-ink-2"><span className="text-[22px] font-semibold text-ink underline">{money(quote.total_price_cents)}</span> for {plural(quote.nights, "night")}</p>
+        ) : (
+          <p><span className="text-[22px] font-semibold">{money(listing.price_per_night_cents)}</span> <span className="text-base">night</span></p>
         )}
       </div>
 
-      <div className={`rounded-xl border ${dateError || guestError ? "border-danger" : "border-line-strong"}`}>
-        <div className="grid grid-cols-2 divide-x divide-line-strong overflow-hidden rounded-t-xl">
+      <div className={`rounded-lg border ${dateError || guestError ? "border-danger" : "border-line-strong"}`}>
+        <div className="grid grid-cols-2 divide-x divide-line-strong overflow-hidden rounded-t-lg">
           <button type="button" className={field} onClick={() => setOpen(open === "dates" ? null : "dates")} aria-expanded={open === "dates"} aria-describedby={dateError ? "date-err" : undefined}>
             <span className="text-[10px] font-bold uppercase">Check-in</span>
             <span className={`text-sm ${stay.check_in ? "" : "text-ink-2"}`}>{stay.check_in ? formatDate(stay.check_in, "M/d/yyyy") : "Add date"}</span>
@@ -77,7 +70,7 @@ export function BookingCard({ listing }: { listing: Listing }) {
             <span className={`text-sm ${stay.check_out ? "" : "text-ink-2"}`}>{stay.check_out ? formatDate(stay.check_out, "M/d/yyyy") : "Add date"}</span>
           </button>
         </div>
-        <button type="button" className={`${field} w-full rounded-b-xl border-t border-line-strong`} onClick={() => setOpen(open === "guests" ? null : "guests")} aria-expanded={open === "guests"}>
+        <button type="button" className={`${field} w-full rounded-b-lg border-t border-line-strong`} onClick={() => setOpen(open === "guests" ? null : "guests")} aria-expanded={open === "guests"}>
           <span className="text-[10px] font-bold uppercase">Guests</span>
           <span className="text-sm">{plural(stay.guests, "guest")}</span>
         </button>
@@ -102,13 +95,13 @@ export function BookingCard({ listing }: { listing: Listing }) {
         </div>
       )}
 
-      <button onClick={reserve} disabled={isOwner || unavailable} className={btn("brand", "mt-4 w-full py-3.5 text-base")}>
+      <button onClick={reserve} disabled={isOwner || unavailable} className={btn("brand", "mt-4 w-full bg-gradient-to-r from-[#e61e4d] via-[#e31c5f] to-[#d70466] py-3.5 text-base hover:from-[#d70466] hover:to-[#d70466] hover:bg-none")}>
         {isOwner ? "This is your listing" : unavailable ? "Unavailable" : hasDates ? "Reserve" : "Check availability"}
       </button>
 
       {quote ? (
-        <div className="anim-fade mt-5">
-          <p className="mb-4 text-center text-sm text-ink-2">You won&apos;t be charged yet — payment is simulated</p>
+        <div className="anim-fade mt-4">
+          <p className="mb-5 text-center text-sm">You won&apos;t be charged yet — payment is simulated</p>
           <PriceBreakdown quote={quote} nightlyCents={listing.price_per_night_cents} />
         </div>
       ) : (

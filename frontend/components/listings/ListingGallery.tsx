@@ -24,7 +24,7 @@ export function ListingGallery({ images, title }: { images: string[]; title: str
       </div>
 
       {/* Desktop: one dominant photo + four supporting */}
-      <div className="relative hidden aspect-[2.2/1] max-h-[520px] w-full grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-2xl sm:grid">
+      <div className="relative hidden aspect-[1120/476] w-full grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-xl sm:grid">
         <button onClick={() => show(0)} className={`${tile} ${images.length >= 5 ? "col-span-2 row-span-2" : "col-span-4 row-span-2"}`} aria-label="Open photo 1">
           <Image src={images[0]} alt={alt(0)} fill priority sizes="(min-width:1280px) 640px, 50vw" quality={75} className="object-cover" />
         </button>
@@ -33,8 +33,8 @@ export function ListingGallery({ images, title }: { images: string[]; title: str
             <Image src={src} alt={alt(i + 1)} fill sizes="(min-width:1280px) 320px, 25vw" quality={60} className="object-cover" />
           </button>
         ))}
-        <button onClick={() => show(0)} className="absolute bottom-4 right-4 flex items-center gap-2 rounded-lg border border-ink bg-bg px-4 py-2 text-sm font-semibold shadow-sm transition-colors hover:bg-surface">
-          <Grid2x2 className="size-4" aria-hidden />
+        <button onClick={() => show(0)} className="absolute bottom-6 right-6 flex items-center gap-2 rounded-lg border border-black/10 bg-white px-3 py-1.5 text-xs font-semibold shadow-sm transition-colors hover:bg-surface">
+          <Grid2x2 className="size-3.5" aria-hidden />
           Show all photos
         </button>
       </div>

@@ -76,8 +76,8 @@ export function ExplorePage() {
 
   return (
     <div>
-      <div className="sticky top-[var(--header-h,73px)] z-30 bg-bg">
-        <div className="mx-auto flex max-w-[1760px] items-start gap-4 px-4 pt-4 sm:px-6 lg:px-10">
+      <div className="sticky top-[var(--header-h,80px)] z-30 bg-bg">
+        <div className="mx-auto flex max-w-[1760px] items-start gap-4 px-4 pt-3 sm:px-6 md:px-10 xl:px-12">
           <CategoryNavigation value={state.category} onChange={(category) => update({ category })} />
           <button
             onClick={() => setFiltersOpen(true)}
@@ -91,7 +91,7 @@ export function ExplorePage() {
         <div className="border-b border-line" />
       </div>
 
-      <section className="mx-auto max-w-[1760px] px-4 pb-4 pt-6 sm:px-6 lg:px-10" aria-live="polite">
+      <section className="mx-auto max-w-[1760px] px-4 pb-4 pt-6 sm:px-6 md:px-10 xl:px-12" aria-live="polite">
         <div className="mb-6 flex flex-wrap items-center gap-x-4 gap-y-3">
           <p className="mr-auto text-sm text-ink-2">
             {results.loading && !data ? "Finding stays…" : data ? <><span className="font-semibold text-ink">{data.total}</span> {data.total === 1 ? "stay" : "stays"}</> : ""}

@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { ArrowLeft, Share2, Star } from "lucide-react";
+import { Share2, Star } from "lucide-react";
 import { BookingCard, useAvailability } from "@/components/booking/BookingCard";
 import { DateRangePicker } from "@/components/search/DateRangePicker";
 import { AmenityGrid } from "@/components/listings/AmenityGrid";
@@ -11,7 +10,7 @@ import { LocationMap } from "@/components/listings/LocationMap";
 import { ReviewsSection } from "@/components/listings/ReviewsSection";
 import { Avatar } from "@/components/ui/Avatar";
 import { useToast } from "@/components/ui/Toast";
-import { formatRange, plural } from "@/lib/format";
+import { fmtRating, formatRange, isGuestFavourite, plural } from "@/lib/format";
 import { useStay } from "@/lib/stay";
 import type { Listing } from "@/types";
 
@@ -49,30 +48,33 @@ export function ListingDetails({ listing }: { listing: Listing }) {
   };
 
   return (
-    <div className="mx-auto max-w-[1280px] px-4 pb-10 pt-6 sm:px-6 lg:px-10">
-      <Link href="/" className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-ink-2 transition-colors hover:text-ink">
-        <ArrowLeft className="size-4" aria-hidden />Back to explore
-      </Link>
-      <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-        <h1 className="text-[26px] font-semibold leading-tight">{listing.title}</h1>
+    <div className="mx-auto max-w-[1200px] px-4 pb-10 pt-8 sm:px-6 md:px-10 lg:px-[40px] xl:max-w-[1120px] xl:px-0">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-[26px] font-medium leading-8">{listing.title}</h1>
         <div className="flex items-center gap-1">
-          <button onClick={share} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition-colors hover:bg-surface-2"><Share2 className="size-4" aria-hidden />Share</button>
+          <button onClick={share} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium underline transition-colors hover:bg-surface-2"><Share2 className="size-4" aria-hidden />Share</button>
           <FavoriteButton listingId={listing.id} title={listing.title} variant="inline" />
         </div>
       </div>
 
       <ListingGallery images={listing.images} title={listing.title} />
 
-      <div className="mt-10 grid gap-x-20 lg:grid-cols-[1fr_380px]">
+      <div className="mt-6 grid gap-x-24 lg:grid-cols-[1fr_372px]">
         <div className="min-w-0 space-y-10 [&>section]:border-t [&>section]:border-line [&>section]:pt-10 [&>section:first-child]:border-0 [&>section:first-child]:pt-0">
           <section aria-labelledby="overview">
-            <h2 id="overview" className="text-[22px] font-semibold">{listing.property_type} in {listing.location}</h2>
-            <p className="mt-1 text-ink-2">
-              {plural(listing.max_guests, "guest")} · {plural(listing.bedrooms, "bedroom")} · {plural(listing.beds, "bed")} · {plural(listing.bathrooms, "bath")}
+            <h2 id="overview" className="text-[22px] font-semibold leading-7">{listing.property_type} in {listing.location}</h2>
+            <p className="mt-1 text-base">
+              {plural(listing.max_guests, "guest")} · {listing.bedrooms === 0 ? "Studio" : plural(listing.bedrooms, "bedroom")} · {plural(listing.beds, "bed")} · {plural(listing.bathrooms, "bathroom")}
             </p>
-            <p className="mt-3 flex items-center gap-1.5 text-sm">
-              {listing.rating ? (<><Star className="size-3.5 fill-ink" aria-hidden /><span className="font-semibold">{listing.rating.toFixed(2)}</span><span className="text-ink-2">· {plural(listing.review_count, "review")}</span></>) : <span className="text-ink-2">New listing</span>}
-            </p>
+            {listing.rating ? (
+              <div className="mt-6 flex items-center justify-between gap-4 rounded-xl border border-line px-6 py-4">
+                <p className="font-semibold leading-tight">{isGuestFavourite(listing.rating, listing.review_count) ? "Guest favourite" : "Rated by guests"}<span className="block text-sm font-normal text-ink-2">{isGuestFavourite(listing.rating, listing.review_count) ? "One of the most loved stays on Roamly, according to guests" : "Based on sample reviews"}</span></p>
+                <div className="flex shrink-0 items-center divide-x divide-line">
+                  <p className="pr-5 text-center"><span className="block text-[22px] font-semibold leading-6">{fmtRating(listing.rating)}</span><span className="flex justify-center gap-px">{Array.from({ length: 5 }).map((_, i) => <Star key={i} className="size-2.5 fill-ink" aria-hidden />)}</span></p>
+                  <p className="pl-5 text-center"><span className="block text-[22px] font-semibold leading-6">{listing.review_count}</span><span className="text-xs text-ink-2">Reviews</span></p>
+                </div>
+              </div>
+            ) : <p className="mt-3 text-sm text-ink-2">New listing</p>}
           </section>
           <section aria-label="Host" className="flex items-center gap-4">
             <Avatar name={listing.host.name} src={listing.host.avatar_url} size={56} />
@@ -91,7 +93,7 @@ export function ListingDetails({ listing }: { listing: Listing }) {
           <LocationMap listing={listing} />
         </div>
         <div className="relative mt-10 lg:mt-0">
-          <div className="lg:sticky lg:top-[120px]"><BookingCard listing={listing} /></div>
+          <div className="lg:sticky lg:top-[112px]"><BookingCard listing={listing} /></div>
         </div>
       </div>
     </div>

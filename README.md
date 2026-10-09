@@ -4,6 +4,10 @@ Roamly is an independent, photo-forward accommodation marketplace built as a ful
 
 > **Demo content notice:** all listings, hosts, guests, reviews and bookings are fictional seed data. Payments are simulated — nothing is charged and no card details are collected. Photos are from [Unsplash](https://unsplash.com).
 
+## Design fidelity
+
+The UI follows Airbnb's interaction patterns and was tuned against measurements of the live site (viewed in a browser at 1440 px): 4:3 card photos with ~20 px radius, 24 px column gaps and 48 px page margins, the "Property type in City / ★ rating (reviews) / listing name / beds / price" card text, the "Guest favourite" pill (derived from rating ≥ 4.8 with ≥ 3 reviews), a 66 px segmented search pill that collapses into a compact "Anywhere | Any week | Add guests" pill on scroll, a 1120 px listing page with a 560 px hero + 2×2 gallery, and a 372 px sticky reservation card. It is an independent implementation, not a pixel-exact clone: fonts (Inter vs Airbnb Cereal), the logo, imagery and the home page's carousel rows differ on purpose.
+
 ## Features
 
 - **Explore:** photo-led responsive grid (4 / 3 / 2 / 1 columns), 10 categories, sorting, pagination, skeleton / empty / error states.

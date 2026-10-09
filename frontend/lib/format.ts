@@ -45,3 +45,11 @@ export const CATEGORY_LABELS: Record<string, string> = {
 /** Next/Image loader-free helper: shrink Unsplash URLs requested by seed data. */
 export const initials = (name: string) =>
   name.split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
+
+/** "5.0", "4.83" - Airbnb shows at least one decimal and at most two. */
+export const fmtRating = (r: number) => (Math.round(r * 100) % 10 === 0 ? r.toFixed(1) : r.toFixed(2));
+
+/** Derived (not stored) so it is always consistent with the reviews shown. */
+export const isGuestFavourite = (rating: number | null, reviews: number) => (rating ?? 0) >= 4.8 && reviews >= 3;
+
+export const cityOf = (location: string) => location.split(",")[0];

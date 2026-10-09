@@ -15,6 +15,14 @@ await step("home renders 12 cards w/ prices", async () => {
   ok(await p.locator("article").count() === 12, "cards="+await p.locator("article").count());
   ok((await p.locator("article").first().innerText()).includes("$"), "no price");
 });
+await step("header: pill collapses on scroll and re-expands on click", async () => {
+  ok(await p.locator("[role=search]").count() === 1, "expanded pill missing at top");
+  await p.mouse.wheel(0, 700); await p.waitForTimeout(700);
+  ok(await p.locator("[role=search]").count() === 0, "did not collapse");
+  await p.getByRole("button", { name: "Start your search" }).click(); await p.waitForTimeout(700);
+  ok(await p.locator("[role=search]").count() === 1, "did not re-expand");
+  await p.evaluate(() => window.scrollTo(0, 0)); await p.waitForTimeout(400);
+});
 await step("category filter (Cabins)", async () => {
   await p.getByRole("button", { name: "Cabins" }).click(); await p.waitForURL(/category=cabins/);
   await p.waitForTimeout(700); const n = await p.locator("article").count(); ok(n>=2 && n<12, "n="+n);

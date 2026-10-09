@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, ImageOff, Star } from "lucide-react";
 import { FavoriteButton } from "@/components/listings/FavoriteButton";
-import { money, plural } from "@/lib/format";
+import { cityOf, fmtRating, formatRange, isGuestFavourite, money, plural } from "@/lib/format";
 import type { Listing } from "@/types";
 
 interface Props {
@@ -21,6 +21,8 @@ export function ListingCard({ listing, carry = "", priority = false }: Props) {
   const images = listing.images.slice(0, 5);
   const href = `/listings/${listing.id}${carry ? `?${carry}` : ""}`;
   const q = listing.quote;
+  const cp = new URLSearchParams(carry);
+  const dates = cp.get("check_in") && cp.get("check_out") ? formatRange(cp.get("check_in")!, cp.get("check_out")!) : null;
 
   const step = (e: React.MouseEvent, d: number) => {
     e.preventDefault();
@@ -31,7 +33,7 @@ export function ListingCard({ listing, carry = "", priority = false }: Props) {
   return (
     <article className="group relative">
       <Link href={href} className="block rounded-xl focus-visible:outline-offset-4" aria-label={`${listing.title}, ${listing.location}`}>
-        <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-surface-2">
+        <div className="relative aspect-[4/3] overflow-hidden rounded-[20px] bg-surface-2">
           {failed[idx] ? (
             <div className="grid h-full place-items-center text-ink-2"><ImageOff className="size-8" aria-hidden /></div>
           ) : (
@@ -47,6 +49,9 @@ export function ListingCard({ listing, carry = "", priority = false }: Props) {
               onError={() => setFailed((f) => ({ ...f, [idx]: true }))}
               className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
             />
+          )}
+          {isGuestFavourite(listing.rating, listing.review_count) && (
+            <span className="absolute left-3 top-3 rounded-full bg-white px-2.5 py-1 text-[13px] font-semibold shadow-sm">Guest favourite</span>
           )}
           {images.length > 1 && (
             <>
@@ -65,32 +70,40 @@ export function ListingCard({ listing, carry = "", priority = false }: Props) {
           )}
         </div>
 
-        <div className="mt-3 flex items-start justify-between gap-3">
-          <h3 className="line-clamp-1 text-[15px] font-semibold">{listing.location}</h3>
-          <p className="flex shrink-0 items-center gap-1 text-[15px]">
+        <div className="mt-3 flex items-start justify-between gap-3 text-[15px] leading-5">
+          <h3 className="line-clamp-1 font-semibold">{listing.property_type} in {cityOf(listing.location)}</h3>
+          <p className="flex shrink-0 items-center gap-1">
             {listing.rating ? (
               <>
-                <Star className="size-3.5 fill-ink" aria-hidden />
-                <span>{listing.rating.toFixed(2)}</span>
-                <span className="sr-only">average rating from {plural(listing.review_count, "review")}</span>
+                <Star className="size-3 fill-ink" aria-hidden />
+                <span>{fmtRating(listing.rating)}</span>
+                <span className="text-ink-2">({listing.review_count})</span>
+                <span className="sr-only"> average rating from {plural(listing.review_count, "review")}</span>
               </>
             ) : (
-              <span className="text-ink-2">New</span>
+              <>
+                <Star className="size-3 fill-ink" aria-hidden />
+                <span>New</span>
+              </>
             )}
           </p>
         </div>
-        <p className="line-clamp-1 text-[15px] text-ink-2">{listing.title}</p>
-        <p className="text-[15px] text-ink-2">
-          {listing.property_type} · {plural(listing.bedrooms, "bedroom")}
+        <p className="line-clamp-1 text-[15px] leading-5 text-ink-2">{listing.title}</p>
+        <p className="text-[15px] leading-5 text-ink-2">
+          {listing.bedrooms === 0 ? "Studio" : plural(listing.bedrooms, "bedroom")} · {plural(listing.beds, "bed")} · {plural(listing.bathrooms, "bathroom")}
         </p>
-        <p className="mt-1 text-[15px]">
-          <span className="font-semibold">{money(listing.price_per_night_cents)}</span>
-          <span className="text-ink"> night</span>
-          {q && (
-            <span className="text-ink-2">
-              {" "}· <span className="font-medium text-ink underline">{money(q.total_price_cents)} total</span>
-              <span className="sr-only"> for {plural(q.nights, "night")}</span>
-            </span>
+        {dates && <p className="text-[15px] leading-5 text-ink-2">{dates}</p>}
+        <p className="mt-1 text-[15px] leading-5">
+          {q ? (
+            <>
+              <span className="font-semibold underline">{money(q.total_price_cents)}</span>
+              <span> for {plural(q.nights, "night")}</span>
+            </>
+          ) : (
+            <>
+              <span className="font-semibold">{money(listing.price_per_night_cents)}</span>
+              <span> night</span>
+            </>
           )}
         </p>
       </Link>

@@ -42,9 +42,10 @@ function useDraft() {
 }
 
 const seg =
-  "flex min-w-0 flex-col justify-center rounded-full px-5 py-2 text-left transition-colors hover:bg-surface-2 data-[active=true]:bg-bg data-[active=true]:shadow-pop";
+  "relative flex h-full min-w-0 flex-col justify-center rounded-full px-8 text-left transition-colors hover:bg-[#ebebeb] data-[active=true]:bg-bg data-[active=true]:shadow-pop " +
+  "[&:not(:first-child)]:before:absolute [&:not(:first-child)]:before:left-0 [&:not(:first-child)]:before:top-[26%] [&:not(:first-child)]:before:h-[48%] [&:not(:first-child)]:before:w-px [&:not(:first-child)]:before:bg-line [&:hover]:before:opacity-0 [&[data-active=true]]:before:opacity-0";
 
-export function SearchBar() {
+export function SearchBar({ mode, onSubmitted }: { mode: "mobile" | "desktop"; onSubmitted?: () => void }) {
   const d = useDraft();
   const [panel, setPanel] = useState<Panel>(null);
   const wrap = useRef<HTMLDivElement>(null);
@@ -55,6 +56,7 @@ export function SearchBar() {
     setPanel(null);
     setMobileOpen(false);
     d.submit();
+    onSubmitted?.();
   };
 
   const summary = d.q || "Where to?";
@@ -65,6 +67,7 @@ export function SearchBar() {
 
   return (
     <>
+      {mode === "mobile" && <>
       {/* Mobile: compact trigger that opens a full-screen search sheet */}
       <button
         onClick={() => setMobileOpen(true)}
@@ -112,16 +115,18 @@ export function SearchBar() {
         </form>
       </Dialog>
 
+      </>}
+
       {/* Desktop: segmented pill */}
-      <div ref={wrap} className="relative hidden w-full max-w-[820px] md:block">
+      {mode === "desktop" && <div ref={wrap} className="relative mx-auto w-full max-w-[850px]">
         <form
           onSubmit={(e) => { e.preventDefault(); go(); }}
           role="search"
           aria-label="Search stays"
-          className={`grid grid-cols-[1.4fr_1fr_1fr_1.1fr] items-center rounded-full border border-line pr-2 shadow-search transition-shadow hover:shadow-pop ${panel ? "bg-surface-2" : "bg-bg"}`}
+          className={`grid h-[66px] grid-cols-[1.45fr_1fr_1fr_1.25fr] items-stretch rounded-full border border-line pr-2 shadow-search transition-shadow hover:shadow-pop ${panel ? "bg-[#ebebeb]" : "bg-bg"}`}
         >
           <label data-active={panel === "where"} className={`${seg} cursor-text`} onClick={() => setPanel("where")}>
-            <span className="text-[11px] font-semibold">Where</span>
+            <span className="text-xs font-semibold">Where</span>
             <input
               value={d.q}
               onChange={(e) => d.setQ(e.target.value)}
@@ -132,20 +137,20 @@ export function SearchBar() {
             />
           </label>
           <button type="button" data-active={panel === "in"} className={seg} onClick={() => setPanel("in")} aria-haspopup="dialog" aria-expanded={panel === "in"}>
-            <span className="text-[11px] font-semibold">Check in</span>
+            <span className="text-xs font-semibold">Check in</span>
             <span className={`text-sm ${d.dates.check_in ? "" : "text-ink-2"}`}>{d.dates.check_in ? formatDate(d.dates.check_in, "MMM d") : "Add dates"}</span>
           </button>
           <button type="button" data-active={panel === "out"} className={seg} onClick={() => setPanel("out")} aria-haspopup="dialog" aria-expanded={panel === "out"}>
-            <span className="text-[11px] font-semibold">Check out</span>
+            <span className="text-xs font-semibold">Check out</span>
             <span className={`text-sm ${d.dates.check_out ? "" : "text-ink-2"}`}>{d.dates.check_out ? formatDate(d.dates.check_out, "MMM d") : "Add dates"}</span>
           </button>
-          <div className="flex items-center">
-            <button type="button" data-active={panel === "who"} className={`${seg} flex-1`} onClick={() => setPanel("who")} aria-haspopup="dialog" aria-expanded={panel === "who"}>
-              <span className="text-[11px] font-semibold">Who</span>
+          <div className="relative flex items-center">
+            <button type="button" data-active={panel === "who"} className={`${seg} h-full flex-1`} onClick={() => setPanel("who")} aria-haspopup="dialog" aria-expanded={panel === "who"}>
+              <span className="text-xs font-semibold">Who</span>
               <span className={`text-sm ${d.guests ? "" : "text-ink-2"}`}>{d.guests ? plural(d.guests, "guest") : "Add guests"}</span>
             </button>
-            <button type="submit" aria-label="Search" className="grid size-10 shrink-0 place-items-center rounded-full bg-brand text-white transition-colors hover:bg-brand-hover active:scale-95">
-              <Search className="size-[18px]" strokeWidth={2.5} />
+            <button type="submit" aria-label="Search" className="grid size-12 shrink-0 place-items-center rounded-full bg-brand text-white transition-colors hover:bg-brand-hover active:scale-95">
+              <Search className="size-4" strokeWidth={3} />
             </button>
           </div>
         </form>
@@ -183,7 +188,26 @@ export function SearchBar() {
             {panel === "who" && <GuestSelector value={d.guests} onChange={d.setGuests} min={0} hint="Ages 13 or above" />}
           </div>
         )}
-      </div>
+      </div>}
     </>
+  );
+}
+
+/** Airbnb's collapsed header pill ("Anywhere | Any week | Add guests"). */
+export function CompactSearch({ onOpen }: { onOpen: () => void }) {
+  const s = parseSearch(useSearchParams());
+  const part = "px-4 text-sm font-medium first:pl-5";
+  const dates = s.check_in && s.check_out ? `${formatDate(s.check_in, "MMM d")} – ${formatDate(s.check_out, "MMM d")}` : "Any week";
+  return (
+    <button
+      onClick={onOpen}
+      aria-label="Start your search"
+      className="mx-auto flex h-12 items-center divide-x divide-line rounded-full border border-line bg-bg py-1 pr-2 text-left shadow-search transition-shadow hover:shadow-pop"
+    >
+      <span className={`${part} max-w-[200px] truncate`}>{s.q || "Anywhere"}</span>
+      <span className={`${part} whitespace-nowrap`}>{dates}</span>
+      <span className={`${part} whitespace-nowrap ${s.guests ? "" : "font-normal text-ink-2"}`}>{s.guests ? plural(s.guests, "guest") : "Add guests"}</span>
+      <span className="ml-1 grid size-8 shrink-0 place-items-center rounded-full bg-brand text-white"><Search className="size-3.5" strokeWidth={3} /></span>
+    </button>
   );
 }

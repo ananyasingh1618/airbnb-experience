@@ -26,7 +26,7 @@ export function FavoriteButton({ listingId, title, variant = "overlay" }: Props)
         onClick={onClick}
         aria-pressed={on}
         disabled={pending(listingId)}
-        className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold underline-offset-2 transition-colors hover:bg-surface-2"
+        className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium underline transition-colors hover:bg-surface-2"
       >
         <Heart className={`size-4 transition-transform duration-150 ${on ? "scale-110 fill-brand text-brand" : ""}`} aria-hidden />
         {on ? "Saved" : "Save"}
@@ -40,7 +40,7 @@ export function FavoriteButton({ listingId, title, variant = "overlay" }: Props)
       aria-pressed={on}
       aria-label={on ? `Remove ${title} from favorites` : `Save ${title} to favorites`}
       disabled={pending(listingId)}
-      className="absolute right-3 top-3 z-10 grid size-9 place-items-center rounded-full transition-transform duration-150 hover:scale-110 active:scale-95"
+      className="absolute right-2.5 top-2.5 z-10 grid size-9 place-items-center rounded-full transition-transform duration-150 hover:scale-110 active:scale-95"
     >
       <Heart
         className={`size-6 drop-shadow-[0_1px_2px_rgb(0_0_0/0.45)] transition-colors duration-150 ${
