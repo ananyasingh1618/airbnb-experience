@@ -1,21 +1,21 @@
-# Render blueprint for the API. SQLite needs a persistent disk, which requires a paid instance type.
+# Render blueprint for the API - FREE plan only, no persistent disk.
+#
+# The free tier's filesystem is ephemeral: the SQLite file is recreated and re-seeded on every
+# start, so bookings / listings created on the live demo are lost on restart, redeploy or after
+# the service spins down from inactivity (~15 min). The first request after a spin-down takes
+# about a minute. Do not change `plan` or add a `disk` unless you intend to pay.
 services:
   - type: web
     name: roamly-api
     runtime: python
     rootDir: backend
-    plan: starter
+    plan: free
     buildCommand: pip install -r requirements.txt
+    # seed.py is idempotent and creates the tables, so a fresh instance starts with demo data.
     startCommand: python seed.py && uvicorn app.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /api/health
     envVars:
-      - key: DATABASE_URL
-        value: sqlite:////var/data/roamly.db
       - key: CORS_ORIGINS
-        sync: false   # set to your Vercel URL, e.g. https://roamly.vercel.app
+        sync: false   # set in the dashboard to your Vercel URL, e.g. https://roamly.vercel.app
       - key: PYTHON_VERSION
         value: 3.13.5
-    disk:
-      name: roamly-data
-      mountPath: /var/data
-      sizeGB: 1

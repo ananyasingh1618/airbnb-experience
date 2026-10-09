@@ -47,7 +47,7 @@ frontend/
   components/        layout · search · listings · booking · host · ui
   lib/               api client, URL<->search state, formatting, providers (demo user, favorites)
 e2e/e2e.mjs          optional browser smoke test
-render.yaml          Render blueprint for the API
+render.yaml          Render blueprint for the API (free plan, no disk)
 ```
 
 ## Local setup
@@ -79,7 +79,7 @@ Tables are also created automatically on API start; `seed.py` just fills them.
 | Variable | Where | Purpose |
 |---|---|---|
 | `NEXT_PUBLIC_API_URL` | frontend | Base URL of the API (default `http://localhost:8000`) |
-| `DATABASE_URL` | backend | SQLAlchemy URL, default `sqlite:///backend/roamly.db`. Use an absolute path on a persistent disk in production |
+| `DATABASE_URL` | backend | SQLAlchemy URL, default `sqlite:///backend/roamly.db`. Leave unset on Render Free (ephemeral); set an absolute path only if you attach a persistent disk |
 | `CORS_ORIGINS` | backend | Comma-separated deployed frontend origin(s); `http://localhost:3000` is always allowed |
 
 ## Demo users & role switching
@@ -156,11 +156,25 @@ Optional browser smoke test (drives the real UI against running servers; needs C
 node e2e/e2e.mjs      # set CHROME_PATH if Chrome isn't auto-detected
 ```
 
-## Deployment
+## Deployment (free tier)
 
-* **Frontend → Vercel:** import the repo, set *Root Directory* to `frontend`, add `NEXT_PUBLIC_API_URL=<your API URL>`.
-* **Backend → Render:** `render.yaml` defines the API with a 1 GB persistent disk at `/var/data` and `DATABASE_URL=sqlite:////var/data/roamly.db`. **Render's free tier has an ephemeral filesystem — SQLite data (including bookings) would be lost on every restart/deploy — so a persistent disk (paid instance) is required for durable data.** Set `CORS_ORIGINS` to the Vercel URL. The start command runs the idempotent `seed.py` first, so a fresh disk is populated and an existing one is left alone.
-* Status: deployment configuration is prepared in this repo; see the hand-off notes for whether live URLs exist.
+Everything below uses free plans only. If a provider asks for a payment method or shows an upgrade prompt, stop — nothing here requires one by design.
+
+**Backend → Render Free web service** (`render.yaml` is a blueprint with `plan: free` and no disk):
+
+1. Render dashboard → *New* → *Blueprint* → connect this GitHub repo (or *New → Web Service* with root directory `backend`, runtime Python, plan **Free**).
+2. Build command `pip install -r requirements.txt`; start command `python seed.py && uvicorn app.main:app --host 0.0.0.0 --port $PORT`; health check path `/api/health`.
+3. Environment: `CORS_ORIGINS` = your Vercel URL (no trailing slash). `DATABASE_URL` is **not** needed — the default SQLite file in the service directory is used.
+4. Check `https://<service>.onrender.com/api/health` and `/docs`.
+
+**Frontend → Vercel Hobby:** import the repo, set *Root Directory* to `frontend` (framework: Next.js, defaults otherwise), add `NEXT_PUBLIC_API_URL=https://<service>.onrender.com`, deploy. Then put the Vercel URL into the backend's `CORS_ORIGINS` and redeploy/restart the backend.
+
+### Free-tier limitations — read before relying on the live demo
+
+* **The database is temporary.** Render's free filesystem is ephemeral and free services cannot attach persistent disks ([Render docs](https://render.com/docs/free)). The SQLite file is lost on every restart, redeploy and spin-down, then re-created and re-seeded by `seed.py`. **Bookings, favorites and host edits made on the live demo do not persist.**
+* **The API sleeps.** Free services spin down after ~15 minutes without traffic; the next request takes about a minute while it boots and re-seeds, so the UI may show its loading/error states briefly after idle.
+* Seed bookings use dates relative to the day the instance started, so the demo never goes stale.
+* For durable data you would need a persistent disk (paid on Render) or an external backup/restore mechanism; neither is configured here.
 
 ## Known limitations & assumptions
 
