@@ -115,14 +115,14 @@ dialog[open] { animation: pop-in 220ms var(--ease); }
 .rdp-root {
   --rdp-accent-color: var(--text);
   --rdp-accent-background-color: var(--surface-2);
-  --rdp-day-height: 44px;
-  --rdp-day-width: 44px;
-  --rdp-day_button-height: 42px;
-  --rdp-day_button-width: 42px;
+  --rdp-day-height: 40px;
+  --rdp-day-width: 40px;
+  --rdp-day_button-height: 38px;
+  --rdp-day_button-width: 38px;
   --rdp-range_middle-background-color: var(--surface-2);
   --rdp-today-color: var(--text);
   --rdp-disabled-opacity: 0.32;
-  --rdp-months-gap: 2.5rem;
+  --rdp-months-gap: 2rem;
   font-size: 14px;
   color: var(--text);
 }
@@ -131,3 +131,6 @@ dialog[open] { animation: pop-in 220ms var(--ease); }
 .rdp-root .rdp-day_button:hover:not(:disabled) { border-color: var(--text); }
 .rdp-root .rdp-disabled .rdp-day_button { text-decoration: line-through; }
 .rdp-root .rdp-today:not(.rdp-selected) .rdp-day_button { font-weight: 700; }
+
+.rdp-root .rdp-selected { font-weight: 500; }
+.rdp-root .rdp-range_middle { font-weight: 400; }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Share2, Star } from "lucide-react";
 import { BookingCard, useAvailability } from "@/components/booking/BookingCard";
 import { DateRangePicker } from "@/components/search/DateRangePicker";
@@ -10,7 +11,7 @@ import { LocationMap } from "@/components/listings/LocationMap";
 import { ReviewsSection } from "@/components/listings/ReviewsSection";
 import { Avatar } from "@/components/ui/Avatar";
 import { useToast } from "@/components/ui/Toast";
-import { fmtRating, formatRange, isGuestFavourite, plural } from "@/lib/format";
+import { fmtRating, formatRange, isGuestFavourite, money, plural } from "@/lib/format";
 import { useStay } from "@/lib/stay";
 import type { Listing } from "@/types";
 
@@ -38,6 +39,15 @@ function AvailabilityCalendar({ listing }: { listing: Listing }) {
 
 export function ListingDetails({ listing }: { listing: Listing }) {
   const { toast } = useToast();
+  const { stay, hasDates } = useStay();
+  const [cardVisible, setCardVisible] = useState(false);
+  useEffect(() => {
+    const el = document.getElementById("reserve");
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => setCardVisible(e.isIntersecting));
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
   const share = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href.split("?")[0]);
@@ -48,7 +58,7 @@ export function ListingDetails({ listing }: { listing: Listing }) {
   };
 
   return (
-    <div className="mx-auto max-w-[1200px] px-4 pb-10 pt-8 sm:px-6 md:px-10 lg:px-[40px] xl:max-w-[1120px] xl:px-0">
+    <div className="mx-auto max-w-[1200px] px-4 pb-28 pt-8 sm:px-6 lg:pb-10 md:px-10 lg:px-[40px] xl:max-w-[1120px] xl:px-0">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-[26px] font-medium leading-8">{listing.title}</h1>
         <div className="flex items-center gap-1">
@@ -94,9 +104,17 @@ export function ListingDetails({ listing }: { listing: Listing }) {
           <ReviewsSection listingId={listing.id} />
           <LocationMap listing={listing} />
         </div>
-        <div className="relative mt-10 lg:mt-0">
+        <div id="reserve" className="relative mt-10 scroll-mt-24 lg:mt-0">
           <div className="lg:sticky lg:top-[112px]"><BookingCard listing={listing} /></div>
         </div>
+      </div>
+      {/* Mobile: Airbnb-style sticky reserve bar */}
+      <div className={`fixed inset-x-0 bottom-0 z-30 flex items-center justify-between gap-4 border-t border-line bg-bg px-4 py-3 transition-transform duration-200 lg:hidden ${cardVisible ? "translate-y-full" : ""}`} aria-hidden={cardVisible}>
+        <p className="min-w-0 leading-tight">
+          <span className="text-base font-semibold">{money(listing.price_per_night_cents)}</span> <span className="text-sm">night</span>
+          <span className="block truncate text-sm text-ink-2 underline">{hasDates ? `${formatRange(stay.check_in, stay.check_out)} · ${plural(stay.guests, "guest")}` : "Add dates for exact pricing"}</span>
+        </p>
+        <a href="#reserve" className="shrink-0 rounded-lg bg-gradient-to-r from-[#e61e4d] via-[#e31c5f] to-[#d70466] px-6 py-3 text-base font-semibold text-white">{hasDates ? "Reserve" : "Check availability"}</a>
       </div>
     </div>
   );

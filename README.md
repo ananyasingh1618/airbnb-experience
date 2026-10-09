@@ -6,7 +6,7 @@ Roamly is an independent, photo-forward accommodation marketplace built as a ful
 
 ## Design fidelity
 
-The UI follows Airbnb's interaction patterns and was tuned against measurements of the live site (viewed in a browser at 1440 px): 4:3 card photos with ~20 px radius, 24 px column gaps and 48 px page margins, the "Property type in City / ★ rating (reviews) / listing name / beds / price" card text, the "Guest favourite" pill (derived from rating ≥ 4.8 with ≥ 3 reviews), a 66 px segmented search pill that collapses into a compact "Anywhere | Any week | Add guests" pill on scroll, a 1120 px listing page with a 560 px hero + 2×2 gallery, and a 372 px sticky reservation card. It is an independent implementation, not a pixel-exact clone: fonts (Inter vs Airbnb Cereal), the logo, imagery and the home page's carousel rows differ on purpose.
+The UI follows Airbnb's interaction patterns and was tuned against measurements of the live site (viewed in a browser at 1440 px): 4:3 card photos with ~20 px radius, 24 px column gaps and 48 px page margins, the "Property type in City / ★ rating (reviews) / listing name / beds / price" card text, the "Guest favourite" pill (derived from rating ≥ 4.8 with ≥ 3 reviews), a 66 px segmented search pill that collapses into a compact "Anywhere | Any week | Add guests" pill on scroll, a 1120 px listing page with a 560 px hero + 2×2 gallery, and a 372 px sticky reservation card (plus a sticky Reserve bar on mobile). It is an independent implementation, not a pixel-exact clone: fonts (Inter vs Airbnb Cereal), the logo, imagery and the home page's carousel rows differ on purpose.
 
 ## Features
 
@@ -59,7 +59,8 @@ Requirements: Python 3.11+ and Node 20+.
 cd backend
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env            # optional; defaults work locally
+# No configuration needed locally. (.env.example documents the variables; the API reads real
+# environment variables and does not load a .env file, e.g. `DATABASE_URL=... uvicorn ...`.)
 python seed.py                  # creates roamly.db and seeds it (safe to re-run; `--reset` wipes first)
 uvicorn app.main:app --reload --port 8000
 ```
@@ -151,9 +152,11 @@ cd frontend && npm run lint && npm run build               # type-check + produc
 ```
 The pytest suite covers: seeding (and idempotence), combined filters + pagination, hiding booked listings, 404/422 errors, invalid reservations (past, zero/negative nights, 0 guests, over capacity, missing user, owner booking), overlap rejection (tail/head/inside/surrounding), adjacent stays allowed, persisted bookings, idempotent resubmits, cancellation freeing dates, a concurrent-booking race, host CRUD + ownership + delete-blocked-by-bookings, favorites, and the DB trigger.
 
-Optional browser smoke test (drives the real UI against running servers; needs Chrome and `npm i playwright-core` somewhere):
+Optional browser smoke test (drives the real UI in Chrome against running servers; 18 steps covering search, filters, favorites, booking, My Trips, conflicts, host CRUD and mobile overflow). It assumes a **freshly seeded** database and both servers running, and it uses random future dates, so repeated runs can occasionally hit a date already booked by an earlier run (the API correctly answers 409) — re-seed with `python seed.py --reset` if that happens:
 ```bash
-node e2e/e2e.mjs      # set CHROME_PATH if Chrome isn't auto-detected
+python seed.py --reset                   # in backend/
+npm i --no-save playwright-core          # from the repo root (installs into an ignored node_modules)
+node e2e/e2e.mjs                         # set CHROME_PATH if Chrome isn't auto-detected
 ```
 
 ## Deployment (free tier)

@@ -21,7 +21,7 @@ export function TripCard({ booking: b, onCancel }: { booking: Booking; onCancel?
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h3 className="truncate text-lg font-semibold">{b.listing_title}</h3>
+            <h3 className="line-clamp-2 text-lg font-semibold leading-snug">{b.listing_title}</h3>
             <p className="text-ink-2">{b.listing_location}</p>
           </div>
           <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${cancelled ? "bg-surface-2 text-ink-2" : b.is_upcoming ? "bg-success-bg text-success" : "bg-surface-2 text-ink"}`}>
@@ -30,14 +30,14 @@ export function TripCard({ booking: b, onCancel }: { booking: Booking; onCancel?
         </div>
         <p className="mt-3 font-medium">{formatRange(b.check_in, b.check_out)}</p>
         <p className="text-sm text-ink-2">{plural(b.nights, "night")} · {plural(b.guests, "guest")} · Ref {b.reference}</p>
-        <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-4">
+        <div className="mt-auto flex flex-col gap-3 pt-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <p className="text-lg font-semibold">{money(b.total_price_cents, { forceCents: true })} <span className="text-sm font-normal text-ink-2">total</span></p>
-          <div className="flex gap-2">
-            <Link href={`/booking-confirmation/${b.id}`} className={btn("outline", "px-4 py-2 text-sm")}>Details</Link>
-            <Link href={`/listings/${b.listing_id}`} className={btn("outline", "px-4 py-2 text-sm")}>View listing</Link>
-            {canCancel && !confirming && <button onClick={() => setConfirming(true)} className={btn("danger", "px-4 py-2 text-sm")}>Cancel</button>}
+          <div className="flex w-full gap-2 sm:w-auto">
+            <Link href={`/booking-confirmation/${b.id}`} className={btn("outline", "flex-1 whitespace-nowrap px-3 py-2 text-sm sm:flex-none sm:px-4")}>Details</Link>
+            <Link href={`/listings/${b.listing_id}`} className={btn("outline", "flex-1 whitespace-nowrap px-3 py-2 text-sm sm:flex-none sm:px-4")}>View listing</Link>
+            {canCancel && !confirming && <button onClick={() => setConfirming(true)} className={btn("danger", "flex-1 whitespace-nowrap px-3 py-2 text-sm sm:flex-none sm:px-4")}>Cancel</button>}
             {canCancel && confirming && (
-              <button disabled={busy} onClick={async () => { setBusy(true); try { await onCancel(b); } finally { setBusy(false); setConfirming(false); } }} className={btn("danger", "bg-danger-bg px-4 py-2 text-sm")}>
+              <button disabled={busy} onClick={async () => { setBusy(true); try { await onCancel(b); } finally { setBusy(false); setConfirming(false); } }} className={btn("danger", "flex-1 whitespace-nowrap bg-danger-bg px-3 py-2 text-sm sm:flex-none sm:px-4")}>
                 {busy ? "Cancelling…" : "Confirm cancel"}
               </button>
             )}
