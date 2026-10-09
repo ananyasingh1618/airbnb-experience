@@ -206,3 +206,19 @@ def test_cors_allows_configured_and_local_origins_only(client):
 def test_health_and_root_behaviour(client):
     assert client.get("/api/health").json() == {"status": "ok"}
     assert client.get("/docs").status_code == 200
+
+
+def test_root_identifies_the_service_as_an_unaffiliated_demo(client):
+    r = client.get("/")
+    assert r.status_code == 200
+    body = r.json()
+    assert "not affiliated" in body["about"].lower() and "simulated" in body["about"].lower()
+    assert body["docs"] == "/docs" and body["health"] == "/api/health"
+    assert "/" not in client.get("/openapi.json").json()["paths"]  # kept out of the public schema
+
+
+def test_no_endpoint_accepts_card_or_password_data(client):
+    """The API schema has no card/password fields (demo payments are never collected)."""
+    schema = client.get("/openapi.json").text.lower()
+    for word in ("password", "card_number", "cardnumber", "cvv", "cvc", "iban", "expiry"):
+        assert word not in schema, word

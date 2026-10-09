@@ -194,6 +194,28 @@ await step("mobile results: Show map / Show list toggle", async () => {
   ok(await mp.locator("article").first().isVisible(), "list back");
   await m.close();
 });
+await step("transparency: disclosure visible on every key page (desktop + mobile), honest title, no card/password fields, no third-party scripts", async () => {
+  const pages = ["/", "/?homes=1", "/listings/3", `/checkout/3?check_in=${iso(280)}&check_out=${iso(282)}&guests=2`, "/trips", "/host"];
+  for (const [label, ctxOpts] of [["desktop", { viewport: { width: 1440, height: 900 } }], ["mobile", { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }]]) {
+    const c = await b.newContext(ctxOpts); const t = await c.newPage();
+    const scriptHosts = new Set();
+    t.on("request", r => { if (r.resourceType() === "script") scriptHosts.add(new URL(r.url()).host); });
+    for (const path of pages) {
+      await t.goto(B + path, { waitUntil: "networkidle" }); await t.waitForTimeout(500);
+      const banner = t.locator("[data-disclosure]");
+      ok(await banner.isVisible(), `${label} ${path}: disclosure banner not visible`);
+      const text = (await banner.innerText()).toLowerCase();
+      ok(text.includes("not affiliated") && text.includes("simulated"), `${label} ${path}: banner wording`);
+      const title = await t.title();
+      ok(/clone/i.test(title) && !/^Airbnb \|/.test(title), `${label} ${path}: title "${title}"`);
+      ok(await t.locator('input[type=password], input[autocomplete^="cc-"], input[name*="card" i], input[name*="cvv" i]').count() === 0, `${label} ${path}: sensitive input present`);
+    }
+    ok([...scriptHosts].every(h => h === new URL(B).host), `${label}: third-party scripts: ${[...scriptHosts].join(",")}`);
+    await c.close();
+  }
+  await p.goto(`${B}/checkout/3?check_in=${iso(281)}&check_out=${iso(283)}&guests=2`, { waitUntil: "networkidle" }); await p.waitForTimeout(500);
+  ok((await p.locator("main").innerText()).includes("independent educational demo, not Airbnb"), "checkout notice");
+});
 await step("mobile 390px: no horizontal overflow on key pages", async () => {
   const m = await b.newContext({ viewport: { width: 390, height: 800 } }); const mp = await m.newPage();
   for (const path of ["/", "/listings/3", "/trips", "/host"]) {

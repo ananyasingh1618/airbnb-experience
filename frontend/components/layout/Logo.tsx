@@ -15,6 +15,7 @@ export function Logo({ markOnly = false }: { markOnly?: boolean }) {
     <Link href="/" aria-label="Airbnb home" className="flex h-20 items-center gap-1 text-brand">
       <BeloMark className="size-[32px]" />
       {!markOnly && <span className="hidden text-[27px] font-semibold leading-none tracking-[-0.05em] lg:inline">airbnb</span>}
+      <span className="ml-1 hidden rounded-full border border-ink-2 px-2 py-0.5 text-[10px] font-semibold uppercase leading-4 tracking-wide text-ink-2 md:inline" title="Independent educational clone, not affiliated with Airbnb">Clone</span>
     </Link>
   );
 }

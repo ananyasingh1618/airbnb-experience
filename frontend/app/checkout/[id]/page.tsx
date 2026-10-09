@@ -70,7 +70,7 @@ function Checkout() {
           </section>
           <section aria-labelledby="pay" className="border-t border-line pt-8">
             <h2 id="pay" className="mb-1 text-[22px] font-semibold">Pay with</h2>
-            <p className="mb-4 text-sm text-ink-2">Demo only — nothing is charged and no card details are collected.</p>
+            <p className="mb-4 rounded-lg bg-[#f7f7f7] p-3 text-sm"><strong className="font-semibold">This is an independent educational demo, not Airbnb.</strong> Nothing is charged, no card or personal payment details are collected, and the reservation is stored only in a demo database.</p>
             <div className="flex items-center gap-3 rounded-xl border border-ink bg-surface p-4">
               <Lock className="size-5" aria-hidden />
               <div><p className="font-medium">Simulated payment</p><p className="text-sm text-ink-2">Paying as {user?.name ?? "demo guest"}</p></div>

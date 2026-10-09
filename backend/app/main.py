@@ -20,7 +20,7 @@ async def lifespan(_app: FastAPI):
 
 
 app = FastAPI(
-    title="Airbnb Clone API",
+    title="Airbnb Clone API (educational demo)",
     version="1.0.0",
     description="Airbnb-inspired marketplace API. Demo identity via the `X-Demo-User` header "
     "(user id) - not real authentication.",
@@ -65,6 +65,18 @@ async def db_busy_handler(_req: Request, _exc: OperationalError):
         {"error": {"code": "database_busy", "message": "The database is busy. Please try again."}},
         status_code=503,
     )
+
+
+@app.get("/", include_in_schema=False)
+def root():
+    """Identify the service to anyone (or any scanner) who opens the bare address."""
+    return {
+        "name": "Airbnb clone demo API",
+        "about": "Independent educational project. Not affiliated with or endorsed by Airbnb, Inc. "
+        "Listings and users are fictional; bookings and payments are simulated; no real personal or payment data is collected.",
+        "docs": "/docs",
+        "health": "/api/health",
+    }
 
 
 app.include_router(listings.router)
