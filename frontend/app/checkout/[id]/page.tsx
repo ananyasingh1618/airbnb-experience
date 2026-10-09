@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/SafeImage";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Lock, Star } from "lucide-react";
@@ -11,7 +11,7 @@ import { btn } from "@/components/ui/button";
 import { api, ApiError } from "@/lib/api";
 import { useAsync } from "@/lib/hooks";
 import { useDemoUser } from "@/lib/demo-user";
-import { formatRange, plural } from "@/lib/format";
+import { formatRange, guestLabel } from "@/lib/format";
 import { stayQuery, useStay } from "@/lib/stay";
 
 function Checkout() {
@@ -65,7 +65,7 @@ function Checkout() {
             <h2 id="trip" className="mb-4 text-[22px] font-semibold">Your trip</h2>
             <dl className="space-y-4">
               <div className="flex justify-between"><div><dt className="font-medium">Dates</dt><dd className="text-ink-2">{formatRange(stay.check_in, stay.check_out)}</dd></div><Link href={back} className="font-semibold underline">Edit</Link></div>
-              <div className="flex justify-between"><div><dt className="font-medium">Guests</dt><dd className="text-ink-2">{plural(stay.guests, "guest")}</dd></div><Link href={back} className="font-semibold underline">Edit</Link></div>
+              <div className="flex justify-between"><div><dt className="font-medium">Guests</dt><dd className="text-ink-2">{guestLabel(stay.guests, stay.infants, stay.pets)}</dd></div><Link href={back} className="font-semibold underline">Edit</Link></div>
             </dl>
           </section>
           <section aria-labelledby="pay" className="border-t border-line pt-8">
@@ -92,7 +92,7 @@ function Checkout() {
         <aside aria-label="Booking summary" className="h-fit rounded-2xl border border-line p-6 md:sticky md:top-28">
           <div className="mb-6 flex gap-4 border-b border-line pb-6">
             <div className="relative size-28 shrink-0 overflow-hidden rounded-xl bg-surface-2">
-              <Image src={l.images[0]} alt={l.title} fill sizes="112px" className="object-cover" />
+              <SafeImage src={l.images[0]} alt={l.title} fill sizes="112px" className="object-cover" />
             </div>
             <div className="min-w-0">
               <p className="text-sm text-ink-2">{l.property_type}</p>

@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/SafeImage";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { CheckCircle2 } from "lucide-react";
@@ -35,7 +35,7 @@ export default function Confirmation() {
       <div className="overflow-hidden rounded-2xl border border-line">
         {b.listing_image && (
           <div className="relative aspect-[16/7] bg-surface-2">
-            <Image src={b.listing_image} alt={b.listing_title} fill priority sizes="760px" className="object-cover" />
+            <SafeImage src={b.listing_image} alt={b.listing_title} fill priority sizes="760px" className="object-cover" />
           </div>
         )}
         <div className="space-y-6 p-6">

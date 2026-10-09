@@ -2,24 +2,16 @@
 
 import { useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ChevronDown, House, Landmark, Mountain, Palmtree, Sailboat, Search, Umbrella, Waves, X, type LucideIcon } from "lucide-react";
+import { ChevronDown, House, MapPin, Search, X } from "lucide-react";
 import { DateRangePicker, type DateValue } from "@/components/search/DateRangePicker";
 import { GuestsPanel, type GuestCounts } from "@/components/search/GuestsPanel";
 import { Dialog } from "@/components/ui/Dialog";
 import { useClickOutside } from "@/lib/hooks";
+import { filterDestinations, useDestinations } from "@/lib/destinations";
 import { formatDate, formatRange } from "@/lib/format";
 import { EMPTY_SEARCH, guestSummary, parseSearch, toQuery } from "@/lib/search";
 
 type Panel = "where" | "when" | "who" | null;
-
-const SUGGESTIONS: { name: string; sub: string; Icon: LucideIcon }[] = [
-  { name: "Whistler, Canada", sub: "For nature lovers", Icon: Mountain },
-  { name: "Tulum, Mexico", sub: "Popular beach destination", Icon: Umbrella },
-  { name: "Paris, France", sub: "For its stunning architecture", Icon: Landmark },
-  { name: "Lagos, Portugal", sub: "Near the coast", Icon: Waves },
-  { name: "Banff, Canada", sub: "Great for a lake getaway", Icon: Sailboat },
-  { name: "Mykonos, Greece", sub: "Popular island destination", Icon: Palmtree },
-];
 
 function useDraft() {
   const sp = useSearchParams();
@@ -56,20 +48,26 @@ function useDraft() {
   return { q, setQ, dates, setDates, guests, setGuests, total, submit, clear };
 }
 
-function WherePanel({ onPick }: { onPick: (name: string) => void }) {
+function WherePanel({ query, onPick }: { query: string; onPick: (name: string) => void }) {
+  const all = useDestinations(true);
+  const items = filterDestinations(all, query);
   return (
     <div>
-      <p className="mb-2 px-3 text-xs font-semibold text-ink-2">Suggested destinations</p>
-      <ul>
-        {SUGGESTIONS.map((s) => (
-          <li key={s.name}>
-            <button type="button" onClick={() => onPick(s.name)} className="flex w-full items-center gap-4 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-[var(--grey-btn)]">
-              <span className="grid size-12 place-items-center rounded-lg border border-line bg-[#f7f7f7]" aria-hidden><s.Icon className="size-6" strokeWidth={1.5} /></span>
-              <span><span className="block text-base">{s.name}</span><span className="block text-sm text-ink-2">{s.sub}</span></span>
-            </button>
-          </li>
-        ))}
-      </ul>
+      <p className="mb-2 px-3 text-xs font-semibold text-ink-2">{query.trim() ? "Matching destinations" : "Suggested destinations"}</p>
+      {items.length === 0 ? (
+        <p className="px-3 py-4 text-sm text-ink-2">{all.length === 0 ? "Loading destinations…" : <>No destinations match “{query.trim()}”. Press <strong>Search</strong> to look anyway.</>}</p>
+      ) : (
+        <ul>
+          {items.map((s) => (
+            <li key={s.name}>
+              <button type="button" onClick={() => onPick(s.name)} className="flex w-full items-center gap-4 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-[var(--grey-btn)]">
+                <span className="grid size-12 place-items-center rounded-lg border border-line bg-[#f7f7f7]" aria-hidden><MapPin className="size-6" strokeWidth={1.5} /></span>
+                <span><span className="block text-base">{s.name}</span><span className="block text-sm text-ink-2">{s.sub}</span></span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
@@ -153,7 +151,7 @@ export function SearchBar({ mode, onSubmitted }: { mode: "mobile" | "desktop"; o
             {card("where", "Where?", d.q || "I'm flexible",
               <>
                 <div className="mb-4 flex items-center gap-3 rounded-xl border border-line-strong px-4"><Search className="size-4" aria-hidden /><input id="m-where" value={d.q} onChange={(e) => d.setQ(e.target.value)} placeholder="Search destinations" className="w-full bg-transparent py-3.5 outline-none" /></div>
-                <WherePanel onPick={(n) => { d.setQ(n); setSection("when"); }} />
+                <WherePanel query={d.q} onPick={(n) => { d.setQ(n); setSection("when"); }} />
               </>)}
             {card("when", "When's your trip?", datesText || "Add dates", <WhenPanel dates={d.dates} onChange={(v) => { d.setDates(v); if (v.check_in && v.check_out) setSection("who"); }} months={1} />)}
             {card("who", "Who's coming?", whoText || "Add guests", <GuestsPanel value={d.guests} onChange={d.setGuests} compact />)}
@@ -186,7 +184,7 @@ export function SearchBar({ mode, onSubmitted }: { mode: "mobile" | "desktop"; o
           <span className={label}>When</span>
           <span className={val(Boolean(datesText))}>{datesText || "Add dates"}</span>
         </button>
-        <div data-active={panel === "who"} className={`${seg} flex-row items-center justify-between !px-0 pr-2`}>
+        <div data-active={panel === "who"} className={`${seg} flex-row items-center justify-between !pl-0 !pr-2.5`}>
           <button type="button" className="flex h-full min-w-0 flex-1 flex-col justify-center rounded-full pl-8 text-left" onClick={() => setPanel("who")} aria-haspopup="dialog" aria-expanded={panel === "who"}>
             <span className={label}>Who</span>
             <span className={val(Boolean(whoText))}>{whoText || "Add guests"}</span>
@@ -203,7 +201,7 @@ export function SearchBar({ mode, onSubmitted }: { mode: "mobile" | "desktop"; o
           className="anim-pop absolute top-[78px] z-50 rounded-[32px] bg-white p-8 shadow-[0_8px_28px_rgba(0,0,0,0.18)]"
           style={panel === "where" ? { left: 0, width: 440 } : panel === "when" ? { left: 0, right: 0 } : { right: 0, width: 425 }}
         >
-          {panel === "where" && <WherePanel onPick={(n) => { d.setQ(n); setPanel("when"); }} />}
+          {panel === "where" && <WherePanel query={d.q} onPick={(n) => { d.setQ(n); setPanel("when"); }} />}
           {panel === "when" && (
             <>
               <WhenPanel dates={d.dates} onChange={(v) => { d.setDates(v); if (v.check_in && v.check_out) setPanel("who"); }} months={2} />

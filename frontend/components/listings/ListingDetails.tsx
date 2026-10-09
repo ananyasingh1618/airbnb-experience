@@ -8,6 +8,7 @@ import { DateRangePicker } from "@/components/search/DateRangePicker";
 import { AmenityGrid } from "@/components/listings/AmenityGrid";
 import { DetailSubNav } from "@/components/listings/DetailSubNav";
 import { FavoriteButton } from "@/components/listings/FavoriteButton";
+import { MeetYourHost, ThingsToKnow } from "@/components/listings/HostAndRules";
 import { Laurel } from "@/components/listings/Laurel";
 import { ListingGallery } from "@/components/listings/ListingGallery";
 import { LocationMap } from "@/components/listings/LocationMap";
@@ -142,6 +143,8 @@ export function ListingDetails({ listing }: { listing: Listing }) {
           <div className={sec}><AvailabilityCalendar listing={listing} avail={avail} /></div>
           <div className={sec}><ReviewsSection listingId={listing.id} /></div>
           <div className={sec}><LocationMap listing={listing} /></div>
+          <div className={sec}><MeetYourHost listing={listing} /></div>
+          <div className={sec}><ThingsToKnow listing={listing} /></div>
         </div>
 
         <div id="reserve" className="relative mt-4 scroll-mt-24 lg:mt-0">

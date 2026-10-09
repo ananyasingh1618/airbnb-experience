@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/SafeImage";
 import { plural } from "@/lib/format";
 import type { Listing } from "@/types";
 
@@ -17,7 +17,7 @@ export function Sleeping({ listing }: { listing: Listing }) {
           return (
             <div key={i} className="w-[min(320px,78%)] shrink-0">
               <div className="relative aspect-[3/2] overflow-hidden rounded-xl bg-surface-2">
-                <Image src={photos[i % photos.length]} alt={`${listing.bedrooms === 0 ? "Living area" : `Bedroom ${i + 1}`} at ${listing.title}`} fill sizes="320px" quality={60} className="object-cover" />
+                <SafeImage src={photos[i % photos.length]} alt={`${listing.bedrooms === 0 ? "Living area" : `Bedroom ${i + 1}`} at ${listing.title}`} fill sizes="320px" quality={60} className="object-cover" />
               </div>
               <p className="mt-4 text-base font-medium">{listing.bedrooms === 0 ? "Living area" : `Bedroom ${i + 1}`}</p>
               <p className="text-sm text-ink-2">{plural(beds, "bed")}</p>

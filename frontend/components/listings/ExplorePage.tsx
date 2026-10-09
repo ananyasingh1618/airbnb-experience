@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ChevronLeft, ChevronRight, Heart, SlidersHorizontal, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Heart, List, Map as MapIcon, SlidersHorizontal, X } from "lucide-react";
 import { FilterDialog } from "@/components/search/FilterDialog";
 import { ListingGrid, ListingGridSkeleton } from "@/components/listings/ListingGrid";
 import { EmptyState, ErrorState } from "@/components/ui/States";
@@ -35,6 +35,7 @@ export function ExplorePage() {
   const { version } = useFavorites();
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [hovered, setHovered] = useState<number | null>(null);
+  const [mobileMap, setMobileMap] = useState(false); // phones: toggle between list and map
 
   // Only "saved only" results depend on favourite changes; other views keep their data.
   const favDep = state.favorites ? version : 0;
@@ -99,7 +100,7 @@ export function ExplorePage() {
 
       <section className="mx-auto max-w-[1760px] px-4 pb-4 pt-6 sm:px-6 md:px-10 xl:px-12" aria-live="polite">
         <div className="xmap:grid xmap:grid-cols-[minmax(0,1fr)_658px] xmap:gap-12">
-          <div className="min-w-0">
+          <div className={`min-w-0 ${mobileMap ? "max-xmap:hidden" : ""}`}>
             <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
               <h1 className="text-[22px] font-medium leading-7 tracking-[-0.02em]">{heading}</h1>
               <label className="flex items-center gap-2 text-sm">
@@ -145,13 +146,19 @@ export function ExplorePage() {
             )}
           </div>
 
-          <aside className="hidden xmap:block" aria-label="Map">
-            <div className="sticky top-[calc(var(--header-h,96px)+77px)] h-[calc(100vh-var(--header-h,96px)-77px-24px)] min-h-[420px] overflow-hidden rounded-[20px] border border-[#ebebeb]">
+          <aside className={`${mobileMap ? "block" : "hidden"} xmap:block`} aria-label="Map">
+            <div className="sticky top-[calc(var(--header-h,96px)+77px)] h-[calc(100dvh-var(--header-h,96px)-77px-96px)] min-h-[360px] overflow-hidden rounded-[20px] border border-[#ebebeb] xmap:h-[calc(100vh-var(--header-h,96px)-77px-24px)] xmap:min-h-[420px]">
               <ResultsMap items={data?.items ?? []} hoveredId={hovered} onOpen={(id) => router.push(`/listings/${id}${carry ? `?${carry}` : ""}`)} />
             </div>
           </aside>
         </div>
       </section>
+
+      {data && data.items.length > 0 && (
+        <button onClick={() => { setMobileMap((v) => !v); window.scrollTo({ top: 0 }); }} className="fixed bottom-20 left-1/2 z-30 flex -translate-x-1/2 items-center gap-2 rounded-full bg-ink px-5 py-3.5 text-sm font-medium text-white shadow-[0_2px_12px_rgba(0,0,0,0.3)] xmap:hidden">
+          {mobileMap ? <><List className="size-4" aria-hidden />Show list</> : <><MapIcon className="size-4" aria-hidden />Show map</>}
+        </button>
+      )}
 
       <FilterDialog open={filtersOpen} onClose={() => setFiltersOpen(false)} state={state} meta={meta.data} onApply={update} />
     </div>

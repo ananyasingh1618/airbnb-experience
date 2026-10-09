@@ -10,7 +10,7 @@ import { buildRows } from "@/lib/home-rows";
 
 function RowSkeleton() {
   return (
-    <div className="mt-11 first:mt-0" aria-hidden>
+    <div className="mt-[38px] first:mt-0" aria-hidden>
       <Skeleton className="mb-3 h-6 w-48" />
       <div className="flex gap-3 overflow-hidden">
         {Array.from({ length: 7 }).map((_, i) => (
@@ -30,7 +30,7 @@ export function HomePage() {
   const { data, error, reload } = useAsync(ready ? () => api.listings({ page_size: 48, sort: "rating" }) : null, [ready, user?.id]);
   const rows = data ? buildRows(data.items) : [];
   return (
-    <div className="mx-auto max-w-[1760px] px-4 pb-6 pt-8 sm:px-6 md:px-10 md:pt-12 xl:px-12" aria-busy={!data && !error}>
+    <div className="mx-auto max-w-[1760px] px-4 pb-6 pt-6 sm:px-6 md:px-10 md:pt-[54px] xl:px-12" aria-busy={!data && !error}>
       {error ? <ErrorState message={error.message} onRetry={reload} /> : !data ? (<><RowSkeleton /><RowSkeleton /></>) : rows.length === 0 ? (
         <EmptyState title="No stays yet" body="There are no listings to show." action={{ label: "Become a host", href: "/host" }} />
       ) : (

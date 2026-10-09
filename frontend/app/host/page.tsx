@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/SafeImage";
 import Link from "next/link";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { HostGate } from "@/components/host/HostGate";
@@ -64,7 +64,7 @@ function Dashboard({ host }: { host: User }) {
             {listings.data.map((l) => (
               <li key={l.id} className="flex gap-4 rounded-2xl border border-line p-3">
                 <Link href={`/listings/${l.id}`} className="relative aspect-[4/3] w-36 shrink-0 overflow-hidden rounded-xl bg-surface-2 sm:w-44" aria-label={`View ${l.title}`}>
-                  <Image src={l.images[0]} alt={l.title} fill sizes="176px" className="object-cover" />
+                  <SafeImage src={l.images[0]} alt={l.title} fill sizes="176px" className="object-cover" />
                 </Link>
                 <div className="flex min-w-0 flex-1 flex-col">
                   <div className="flex items-start justify-between gap-2">

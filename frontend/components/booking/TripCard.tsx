@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/SafeImage";
 import Link from "next/link";
 import { btn } from "@/components/ui/button";
 import { formatRange, money, plural } from "@/lib/format";
@@ -16,7 +16,7 @@ export function TripCard({ booking: b, onCancel }: { booking: Booking; onCancel?
   return (
     <article className={`flex flex-col gap-5 rounded-2xl border border-line p-4 sm:flex-row ${cancelled ? "opacity-70" : ""}`}>
       <Link href={`/listings/${b.listing_id}`} className="relative aspect-[4/3] w-full shrink-0 overflow-hidden rounded-xl bg-surface-2 sm:w-56" aria-label={`Open ${b.listing_title}`}>
-        {b.listing_image && <Image src={b.listing_image} alt={b.listing_title} fill sizes="(min-width:640px) 224px, 100vw" className="object-cover" />}
+        {b.listing_image && <SafeImage src={b.listing_image} alt={b.listing_title} fill sizes="(min-width:640px) 224px, 100vw" className="object-cover" />}
       </Link>
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex items-start justify-between gap-3">

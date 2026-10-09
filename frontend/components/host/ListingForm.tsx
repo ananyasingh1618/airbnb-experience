@@ -42,7 +42,10 @@ export function ListingForm({ meta, listing }: { meta: Meta; listing?: Listing }
     property_type: listing?.property_type ?? meta.property_types[0],
     category: listing?.category ?? meta.categories[0],
     images: (listing?.images ?? []).join("\n"),
+    latitude: listing?.latitude != null ? String(listing.latitude) : "",
+    longitude: listing?.longitude != null ? String(listing.longitude) : "",
   });
+  const [locating, setLocating] = useState(false);
   const [amenityIds, setAmenityIds] = useState<number[]>(listing?.amenities.map((a) => a.id) ?? []);
   const [errors, setErrors] = useState<Errors>({});
   const [saving, setSaving] = useState(false);
@@ -61,10 +64,29 @@ export function ListingForm({ meta, listing }: { meta: Meta; listing?: Listing }
     if (!int(v.bedrooms, 0, 30)) e.bedrooms = "Whole number from 0 to 30.";
     if (!int(v.beds, 1, 60)) e.beds = "At least 1 bed.";
     if (!(Number(v.bathrooms) >= 0.5)) e.bathrooms = "At least 0.5 bathrooms.";
+    if (v.latitude !== "" && !(Number(v.latitude) >= -90 && Number(v.latitude) <= 90)) e.latitude = "Latitude must be between -90 and 90.";
+    if (v.longitude !== "" && !(Number(v.longitude) >= -180 && Number(v.longitude) <= 180)) e.longitude = "Longitude must be between -180 and 180.";
     const urls = v.images.split("\n").map((s) => s.trim()).filter(Boolean);
     if (urls.length === 0) e.images = "Add at least one image URL (one per line).";
     else if (urls.some((u) => !/^https?:\/\/\S+$/i.test(u))) e.images = "Each line must be a full http(s) URL.";
     return e;
+  };
+
+  // Optional: look the location up on OpenStreetMap Nominatim so the listing gets a pin on the map.
+  const locate = async () => {
+    if (v.location.trim().length < 2) return toast("Enter a location first.", "error");
+    setLocating(true);
+    try {
+      const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(v.location.trim())}`, { headers: { Accept: "application/json" } });
+      const [hit] = (await r.json()) as { lat: string; lon: string }[];
+      if (!hit) return toast("We couldn't find that place. You can type coordinates manually.", "error");
+      setV((s) => ({ ...s, latitude: Number(hit.lat).toFixed(4), longitude: Number(hit.lon).toFixed(4) }));
+      toast("Coordinates filled in from OpenStreetMap", "success");
+    } catch {
+      toast("Location lookup is unavailable right now.", "error");
+    } finally {
+      setLocating(false);
+    }
   };
 
   const submit = async (ev: React.FormEvent) => {
@@ -79,6 +101,8 @@ export function ListingForm({ meta, listing }: { meta: Meta; listing?: Listing }
     const body: ListingInput = {
       title: v.title.trim(), description: v.description.trim(), location: v.location.trim(),
       country: v.country.trim() || null,
+      latitude: v.latitude === "" ? null : Number(v.latitude),
+      longitude: v.longitude === "" ? null : Number(v.longitude),
       price_per_night_cents: Math.round(Number(v.price) * 100),
       cleaning_fee_cents: Math.round(Number(v.cleaning) * 100),
       max_guests: Number(v.max_guests), bedrooms: Number(v.bedrooms), beds: Number(v.beds), bathrooms: Number(v.bathrooms),
@@ -116,7 +140,11 @@ export function ListingForm({ meta, listing }: { meta: Meta; listing?: Listing }
           <Field label="Country (optional)" id="f-country"><input id="f-country" value={v.country} onChange={set("country")} className={input} /></Field>
           <Field label="Property type" id="f-property_type"><select id="f-property_type" value={v.property_type} onChange={set("property_type")} className={input}>{meta.property_types.map((t) => <option key={t}>{t}</option>)}</select></Field>
           <Field label="Category" id="f-category"><select id="f-category" value={v.category} onChange={set("category")} className={input}>{meta.categories.map((c) => <option key={c} value={c}>{CATEGORY_LABELS[c] ?? c}</option>)}</select></Field>
+          <Field label="Latitude (optional)" id="f-latitude" error={err("latitude")}><input id="f-latitude" inputMode="decimal" value={v.latitude} onChange={set("latitude")} aria-invalid={inv("latitude")} className={input} /></Field>
+          <Field label="Longitude (optional)" id="f-longitude" error={err("longitude")}><input id="f-longitude" inputMode="decimal" value={v.longitude} onChange={set("longitude")} aria-invalid={inv("longitude")} className={input} /></Field>
         </div>
+        <button type="button" onClick={locate} disabled={locating} className="text-sm font-medium underline disabled:opacity-50">{locating ? "Looking up…" : "Look up coordinates from the location (OpenStreetMap)"}</button>
+        <p className="text-xs text-ink-2">Coordinates place your listing on the results map.</p>
       </section>
 
       <section className="space-y-5">

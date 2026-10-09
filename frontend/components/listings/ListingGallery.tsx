@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/SafeImage";
 import Link from "next/link";
 import { ChevronLeft, Grip, Heart, Share2 } from "lucide-react";
 import { PhotoViewer } from "@/components/listings/PhotoViewer";
@@ -29,7 +29,7 @@ export function ListingGallery({ images, title, listingId }: { images: string[];
         <div ref={scroller} onScroll={(e) => setIdx(Math.round(e.currentTarget.scrollLeft / e.currentTarget.clientWidth))} className="scrollbar-none flex snap-x snap-mandatory overflow-x-auto" aria-label="Photos">
           {images.map((src, i) => (
             <button key={src} onClick={() => show(i)} className="relative aspect-[4/3] w-full shrink-0 snap-center bg-surface-2" aria-label={`Open photo ${i + 1}`}>
-              <Image src={src} alt={alt(i)} fill sizes="100vw" priority={i === 0} className="object-cover" />
+              <SafeImage src={src} alt={alt(i)} fill sizes="100vw" priority={i === 0} className="object-cover" />
             </button>
           ))}
         </div>
@@ -46,11 +46,11 @@ export function ListingGallery({ images, title, listingId }: { images: string[];
       {/* Desktop: one dominant photo + four supporting */}
       <div className="relative hidden aspect-[1120/476] w-full grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-xl sm:grid">
         <button onClick={() => show(0)} className={`${tile} ${images.length >= 5 ? "col-span-2 row-span-2" : "col-span-4 row-span-2"}`} aria-label="Open photo 1">
-          <Image src={images[0]} alt={alt(0)} fill priority sizes="(min-width:1280px) 560px, 50vw" quality={75} className="object-cover" />
+          <SafeImage src={images[0]} alt={alt(0)} fill priority sizes="(min-width:1280px) 560px, 50vw" quality={75} className="object-cover" />
         </button>
         {images.slice(1, 5).map((src, i) => (
           <button key={src} onClick={() => show(i + 1)} className={tile} aria-label={`Open photo ${i + 2}`}>
-            <Image src={src} alt={alt(i + 1)} fill sizes="(min-width:1280px) 280px, 25vw" quality={60} className="object-cover" />
+            <SafeImage src={src} alt={alt(i + 1)} fill sizes="(min-width:1280px) 280px, 25vw" quality={60} className="object-cover" />
           </button>
         ))}
         <button onClick={() => show(0)} className="absolute bottom-6 right-6 flex items-center gap-2 rounded-lg bg-white/95 px-3 py-2 text-xs font-medium shadow-[0_1px_4px_rgba(0,0,0,0.2)] transition-colors hover:bg-white">

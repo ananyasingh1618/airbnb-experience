@@ -141,6 +141,7 @@ await step("mobile: search sheet applies a destination; tab bar and sticky reser
   const m = await b.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }); const mp = await m.newPage();
   await mp.goto(B, { waitUntil: "networkidle" });
   await mp.getByRole("button", { name: "Start your search" }).click();
+  await mp.locator("#m-where").fill("pari");                                  // typing filters suggestions
   await mp.getByRole("button", { name: /Paris, France/ }).click();            // pick suggestion -> opens When
   await mp.getByRole("button", { name: /^\d+$/ }).nth(20).click().catch(() => {});
   await mp.getByRole("button", { name: "Search", exact: true }).click();
@@ -151,6 +152,46 @@ await step("mobile: search sheet applies a destination; tab bar and sticky reser
   await mp.goto(B + "/listings/3", { waitUntil: "networkidle" }); await mp.waitForTimeout(500);
   ok(await mp.getByRole("button", { name: /Reserve|Check dates/ }).isVisible(), "sticky reserve bar visible");
   ok(await mp.getByRole("navigation", { name: "Main" }).count() === 0, "tab bar hidden on listing page");
+  await m.close();
+});
+await step("mobile booking bar: Check dates scrolls to card & hides bar; with dates Reserve goes to checkout", async () => {
+  const m = await b.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }); const mp = await m.newPage();
+  await mp.goto(B + "/listings/3", { waitUntil: "networkidle" }); await mp.waitForTimeout(500);
+  const bar = mp.locator("div.fixed.bottom-0", { hasText: "night" });
+  ok(await bar.getByRole("button", { name: "Check dates" }).isVisible(), "bar shows Check dates");
+  await bar.getByRole("button", { name: "Check dates" }).click(); await mp.waitForTimeout(1200);
+  ok(await bar.getAttribute("aria-hidden") === "true", "bar hides while the reservation card is on screen");
+  const off = 200 + Math.floor(Math.random() * 100);
+  await mp.goto(`${B}/listings/3?check_in=${iso(off)}&check_out=${iso(off + 2)}&guests=2`, { waitUntil: "networkidle" }); await mp.waitForTimeout(600);
+  ok((await bar.innerText()).includes("For 2 nights"), "bar shows total for nights: " + (await bar.innerText()).replace(/\n/g, " "));
+  await bar.getByRole("button", { name: "Reserve" }).click(); await mp.waitForURL(/checkout\/3/);
+  await m.close();
+});
+await step("image fallback: blocked photos show fallback tiles, layout intact", async () => {
+  const c = await b.newContext({ viewport: { width: 1440, height: 900 } }); await c.route("**/_next/image**", r => r.abort());
+  const fp = await c.newPage(); const e2 = []; fp.on("pageerror", e => e2.push(e.message));
+  await fp.goto(B, { waitUntil: "networkidle" }); await fp.waitForTimeout(1200);
+  ok(await fp.locator("[data-image-fallback]").count() >= 7, "home fallbacks=" + await fp.locator("[data-image-fallback]").count());
+  ok((await fp.locator("main").innerText()).includes("Guest favourites"), "home text still renders");
+  await fp.goto(B + "/listings/3", { waitUntil: "networkidle" }); await fp.waitForTimeout(1000);
+  ok(await fp.locator("[data-image-fallback]").count() >= 3, "listing fallbacks");
+  ok(await fp.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), "no overflow with broken images");
+  ok(e2.length === 0, "page errors: " + e2.join(";")); await c.close();
+});
+await step("avatars: initials render when there is no photo; host + rules sections present", async () => {
+  await p.goto(B + "/listings/3", { waitUntil: "networkidle" }); await p.waitForTimeout(800);
+  const ini = await p.locator("#reviews [role=img]").first().innerText(); ok(/^[A-Z]{2}$/.test(ini), "reviewer initials: " + ini);
+  ok(await p.getByRole("heading", { name: "Meet your host" }).isVisible() || await p.getByRole("heading", { name: "Meet your host" }).count() === 1, "meet host");
+  ok(await p.getByRole("heading", { name: "Things to know" }).count() === 1, "things to know");
+});
+await step("mobile results: Show map / Show list toggle", async () => {
+  const m = await b.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }); const mp = await m.newPage();
+  await mp.goto(B + "/?homes=1", { waitUntil: "networkidle" }); await mp.waitForTimeout(600);
+  await mp.getByRole("button", { name: "Show map" }).click(); await mp.waitForTimeout(1500);
+  ok(await mp.getByRole("region", { name: "Map of results" }).isVisible(), "map visible");
+  ok(await mp.locator("article").first().isHidden(), "list hidden while map shown");
+  await mp.getByRole("button", { name: "Show list" }).click(); await mp.waitForTimeout(500);
+  ok(await mp.locator("article").first().isVisible(), "list back");
   await m.close();
 });
 await step("mobile 390px: no horizontal overflow on key pages", async () => {

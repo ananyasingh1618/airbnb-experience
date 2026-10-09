@@ -21,10 +21,10 @@ export function Carousel({ title, href, children }: { title: string; href: strin
   const go = (dir: 1 | -1) => scroller.current?.scrollBy({ left: dir * scroller.current.clientWidth * 0.9, behavior: "smooth" });
   const arrow = "grid size-8 place-items-center rounded-full bg-[var(--grey-btn)] text-ink transition-[background-color,opacity] hover:bg-[#e4e4e4] disabled:cursor-default disabled:opacity-40 disabled:hover:bg-[var(--grey-btn)]";
   return (
-    <section aria-label={title} className="mt-11 first:mt-0">
+    <section aria-label={title} className="mt-[38px] first:mt-0">
       <div className="mb-3 flex items-center justify-between px-0.5">
         <Link href={href} className="group flex items-center gap-2">
-          <h2 className="text-xl font-semibold tracking-[-0.01em]">{title}</h2>
+          <h2 className="text-xl font-semibold leading-6 tracking-[-0.009em]">{title}</h2>
           <span className="grid size-7 place-items-center rounded-full bg-[var(--grey-btn)] transition-colors group-hover:bg-[#e4e4e4]" aria-hidden><ArrowRight className="size-4" /></span>
         </Link>
         <div className="hidden gap-2 sm:flex">

@@ -12,6 +12,8 @@ export default function ResultsMap({ items, hoveredId, onOpen }: { items: Listin
   const map = useRef<L.Map | null>(null);
   const layer = useRef<L.LayerGroup | null>(null);
   const markers = useRef(new Map<number, L.Marker>());
+  const bounds = useRef<L.LatLngBounds | null>(null);
+  const hadSize = useRef(false);
   const open = useRef(onOpen);
   useEffect(() => { open.current = onOpen; });
 
@@ -24,7 +26,15 @@ export default function ResultsMap({ items, hoveredId, onOpen }: { items: Listin
     }).addTo(m);
     layer.current = L.layerGroup().addTo(m);
     map.current = m;
-    return () => { m.remove(); map.current = null; };
+    // The map may be created while hidden (phones); re-fit once it first gets a real size.
+    const ro = new ResizeObserver(() => {
+      m.invalidateSize();
+      const visible = m.getSize().x > 0 && m.getSize().y > 0;
+      if (visible && !hadSize.current && bounds.current) m.fitBounds(bounds.current, { padding: [48, 48], maxZoom: 10 });
+      if (visible) hadSize.current = true;
+    });
+    ro.observe(el.current);
+    return () => { ro.disconnect(); m.remove(); map.current = null; };
   }, []);
 
   useEffect(() => {
@@ -42,8 +52,9 @@ export default function ResultsMap({ items, hoveredId, onOpen }: { items: Listin
       markers.current.set(l.id, mk);
       pts.push([l.latitude, l.longitude]);
     }
+    bounds.current = pts.length > 1 ? L.latLngBounds(pts) : null;
     if (pts.length === 1) m.setView(pts[0], 9);
-    else if (pts.length > 1) m.fitBounds(L.latLngBounds(pts), { padding: [48, 48], maxZoom: 10 });
+    else if (pts.length > 1 && m.getSize().x > 0) m.fitBounds(bounds.current!, { padding: [48, 48], maxZoom: 10 });
     setTimeout(() => m.invalidateSize(), 0);
   }, [items]);
 

@@ -36,7 +36,7 @@ export function ListingCard({ listing, carry = "", priority = false, onHover }: 
       <Link href={href} className="block rounded-xl focus-visible:outline-offset-4" aria-label={`${listing.title}, ${listing.location}`}>
         <div className="relative aspect-[4/3] overflow-hidden rounded-[20px] bg-surface-2">
           {failed[idx] ? (
-            <div className="grid h-full place-items-center text-ink-2"><ImageOff className="size-8" aria-hidden /></div>
+            <div data-image-fallback role="img" aria-label={listing.title} className="grid h-full place-items-center bg-[var(--grey-btn)] text-ink-2"><ImageOff className="size-8" aria-hidden /></div>
           ) : (
             <Image
               key={images[idx]}

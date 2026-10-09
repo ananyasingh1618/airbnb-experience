@@ -122,7 +122,7 @@ export function SiteHeader() {
         </div>
       </div>
       {expanded && (
-        <div className="anim-fade hidden px-4 pb-8 pt-1 sm:px-6 md:block md:px-10 xl:px-12">
+        <div className="anim-fade hidden px-4 pb-8 pt-1.5 sm:px-6 md:block md:px-10 xl:px-12">
           <Suspense fallback={<div className="skeleton mx-auto h-[66px] max-w-[850px] rounded-full" />}>
             <SearchBar mode="desktop" onSubmitted={collapse} />
           </Suspense>

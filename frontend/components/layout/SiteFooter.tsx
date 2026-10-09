@@ -23,7 +23,7 @@ export function SiteFooter() {
   const demo = (name: string) => () => toast(`“${name}” isn't available in this demo clone.`, "info");
   const link = "text-left text-sm text-[#222] hover:underline";
   return (
-    <footer className="mt-12 border-t border-[#ebebeb] bg-white text-sm">
+    <footer className="mt-12 border-t border-[#ebebeb] bg-white pb-16 text-sm md:pb-0">
       <div className="mx-auto max-w-[1760px] px-4 sm:px-6 md:px-10 xl:px-12">
         <section aria-labelledby="inspo" className="border-b border-[#ebebeb] py-12">
           <h2 id="inspo" className="mb-6 text-[22px] font-medium tracking-[-0.02em]">Inspiration for future getaways</h2>

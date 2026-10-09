@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/SafeImage";
 import { ChevronLeft, Heart, Share2 } from "lucide-react";
 import { Dialog } from "@/components/ui/Dialog";
 import { useFavorites } from "@/lib/favorites";
@@ -32,7 +32,7 @@ export function PhotoViewer({ open, onClose, images, title, listingId, focus = 0
         <div className="scrollbar-none mb-10 flex gap-4 overflow-x-auto pb-1">
           {images.map((src, i) => (
             <button key={src} onClick={() => goto(i)} className="group w-[146px] shrink-0 text-left" aria-label={`Go to photo ${i + 1}`}>
-              <span className="relative block aspect-[3/2] overflow-hidden rounded-lg bg-[var(--grey-btn)]"><Image src={src} alt="" fill sizes="146px" quality={60} className="object-cover transition-opacity group-hover:opacity-80" /></span>
+              <span className="relative block aspect-[3/2] overflow-hidden rounded-lg bg-[var(--grey-btn)]"><SafeImage src={src} alt="" fill sizes="146px" quality={60} className="object-cover transition-opacity group-hover:opacity-80" /></span>
               <span className="mt-2 block text-sm">Photo {i + 1}</span>
             </button>
           ))}
@@ -40,7 +40,7 @@ export function PhotoViewer({ open, onClose, images, title, listingId, focus = 0
         <div className="mx-auto grid max-w-[740px] grid-cols-2 gap-2">
           {images.map((src, i) => (
             <div key={src} ref={(el) => { refs.current[i] = el; }} className={`relative overflow-hidden bg-[var(--grey-btn)] ${i % 3 === 0 ? "col-span-2 aspect-[3/2]" : "aspect-square"} scroll-mt-20`}>
-              <Image src={src} alt={alt(i)} fill sizes="(min-width:768px) 740px, 100vw" quality={75} className="object-cover" />
+              <SafeImage src={src} alt={alt(i)} fill sizes="(min-width:768px) 740px, 100vw" quality={75} className="object-cover" />
             </div>
           ))}
         </div>
